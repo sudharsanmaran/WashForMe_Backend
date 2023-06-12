@@ -1,28 +1,33 @@
-"""
-Views for the
-"""
 import random
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.cache import cache
+from django.contrib.auth import get_user_model
+
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth import get_user_model
 from core import models
 from core.api.serializers import (
     login_serializers,
     user_serializer,
 )
 from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 
 from WashForMe_Backend import settings
 
 
+def TwilioClient():
+    return Client(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
+
 def generate_otp():
     return str(random.randint(1000, 9999))
-
 
 class CreateOTPView(APIView):
     """Generate otp and stores in phone number table."""
@@ -42,14 +47,17 @@ class CreateOTPView(APIView):
     @staticmethod
     def send_otp(phone, otp):
         # Send otp with twilio account.
-
-        message = f'Your OTP is {otp}.'
-        client = Client(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
-        message = client.messages.create(
-            body=message,
-            from_=settings.TWILIO_PHONE_NUMBER,
-            to=phone,
-        )
+        try:
+            myOtp = f'Your OTP is {otp}.'
+            client  = TwilioClient()
+            message = client.messages.create(
+                body=myOtp,
+                to=phone,
+                from_=settings.TWILIO_PHONE_NUMBER,
+            )
+        except TwilioRestException as e:
+            error_message = str(e)
+            raise APIException(detail=error_message)
         return message
 
     @staticmethod
@@ -68,13 +76,10 @@ class CreateOTPView(APIView):
 
     def post(self, request):
         phone = request.data.get('phone')
-        otp, count = self.get_or_create_phone_number(phone)
+        otp = generate_otp()
+        cache.set(phone, otp, timeout=300)
 
-        if count >= 5:
-            return Response({'error': 'Maximum limit reached.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        message = self.send_otp(phone, otp)
-        self.update_phone_number(otp, count, phone, message)
+        self.send_otp(phone, otp)
 
         return Response({'message': 'OTP sent successfully.'})
 
@@ -100,24 +105,23 @@ class LoginOTPView(APIView):
         phone = request.data.get('phone')
         otp = self.str_to_int(request.data.get('otp'))
 
-        phone_number_manager = self.get_phone_number_manager(phone)
+        cacheOtp = cache.get(phone)
+        if cacheOtp and int(cacheOtp) == otp:
+            try:
+                user = get_user_model().objects.get(phone=phone)
+            except models.User.DoesNotExist:
+                user = get_user_model().objects.create_user(phone=phone)
 
-        if not phone_number_manager:
-            return Response({'error': f'Generate otp for {phone} first.'})
+            token = RefreshToken.for_user(user)
 
-        if phone_number_manager.otp != otp:
-            return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+            response_data = {
+            'refresh': str(token),
+            'access': str(token.access_token),
 
-        try:
-            user = get_user_model().objects.get(phone=phone)
-        except models.User.DoesNotExist:
-            user = get_user_model().objects.create_user(phone=phone)
-
-        token, _ = Token.objects.get_or_create(user=user)
-
-        response_data = {
-            'token': token.key,
             'user': user_serializer.UserSerializer(user).data
-        }
-        phone_number_manager.delete()
-        return Response(response_data)
+            }
+
+            cache.delete(phone)
+            return Response(response_data)
+        else:
+            return Response({"error": "OTP not generated or expired."})
