@@ -7,9 +7,10 @@ from rest_framework import (
 )
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-from rest_framework.views import APIView
 
 from drf_spectacular.utils import extend_schema
+from rest_framework.views import APIView
+
 from core.api.serializers.user_serializer import (
     UserSerializer,
     AddressSerializer,
@@ -34,18 +35,19 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         if 'phone' in request.data:
             response = SendOTPView.send_otp(request.data.get('phone'), generate_otp())
-            if response['send']:
-                return super().update(request, *args, **kwargs)
-            return Response({'message': response['message']}, status=status.HTTP_400_BAD_REQUEST)
+            if not response['send']:
+                return Response({'message': response['message']}, status=status.HTTP_400_BAD_REQUEST)
+
+            super().update(request, *args, **kwargs)
+            user = self.get_object()
+            user.is_phone_verified = False
+            user.save()
+            return
         return super().update(request, *args, **kwargs)
 
 
-class UpdatePhone(APIView):
-    throttle_classes = [UserRateThrottle]
-
-
 @extend_schema(
-    tags=['user'],
+    tags=['Address'],
 )
 class AddressDetailsView(mixins.DestroyModelMixin,
                          mixins.UpdateModelMixin,

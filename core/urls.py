@@ -3,7 +3,7 @@ from django.urls import path, include
 
 from core.api.views.login_views import (
     SendOTPView,
-    VerifyOTPView,
+    OTPLoginView,
     DecoratedTokenRefreshView,
 )
 from core.api.views.key_views import (
@@ -27,6 +27,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('token/refresh/', DecoratedTokenRefreshView.as_view(), name='token_refresh'),
     path('send_otp/', SendOTPView.as_view(), name='send-otp'),
-    path('check_otp/', VerifyOTPView.as_view(), name='check-otp'),
+    path('check_otp/', OTPLoginView.as_view(), name='check-otp'),
     path('user_details/', UserDetailView.as_view(), name='user-details'),
 ]

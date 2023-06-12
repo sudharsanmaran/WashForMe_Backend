@@ -10,9 +10,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'other_details']
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'other_details', 'is_phone_verified']
         write_only_fields = ['first_name', 'last_name', 'email']
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'is_phone_verified']
 
 
 class AddressSerializer(serializers.ModelSerializer):

@@ -5,11 +5,13 @@ class CreateOTPSerializer(serializers.Serializer):
     phone = serializers.CharField()
 
 
-class LoginOTPSerializer(serializers.Serializer):
+class LoginOTPSerializer(CreateOTPSerializer):
     """Serializer for creating otp."""
-    phone = serializers.CharField()
     otp = serializers.CharField()
 
+
+class VerifyOTPSerializer(serializers.Serializer):
+    otp = serializers.CharField()
 
 
 class TokenRefreshResponseSerializer(serializers.Serializer):

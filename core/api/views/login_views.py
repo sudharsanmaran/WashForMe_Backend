@@ -2,7 +2,6 @@ import random
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import permissions, status
 
 from drf_spectacular.utils import extend_schema
@@ -22,6 +21,7 @@ from core.api.serializers import (
     login_serializers,
     user_serializer
 )
+from core.api.serializers.login_serializers import VerifyOTPSerializer
 
 
 def TwilioClient():
@@ -77,7 +77,7 @@ class SendOTPView(APIView):
 @extend_schema(
     tags=['accounts'],
 )
-class VerifyOTPView(APIView):
+class OTPLoginView(APIView):
     """Login OTP API View."""
     throttle_classes = [UserRateThrottle]
     serializer_class = login_serializers.LoginOTPSerializer
@@ -88,16 +88,17 @@ class VerifyOTPView(APIView):
         return int(str_number) if str_number.isnumeric else str_number
 
     def post(self, request) -> Response:
-        phone = request.data.get('phone')
+        phone_number = request.data.get('phone')
         otp = request.data.get('otp')
-
-        # cache_otp = cache.get(phone)
-        cache_otp = '0000'
+        cache_otp = cache.get(phone_number)
         if cache_otp == otp:
             try:
-                user = get_user_model().objects.get(phone=phone)
+                user = get_user_model().objects.get(phone=phone_number)
             except models.User.DoesNotExist:
-                user = get_user_model().objects.create_user(phone=phone)
+                user = get_user_model().objects.create_user(phone=phone_number, is_phone_verified=True)
+
+            user.is_phone_verified = True
+            user.save()
 
             token = RefreshToken.for_user(user)
 
@@ -108,8 +109,27 @@ class VerifyOTPView(APIView):
                 'user': user_serializer.UserSerializer(user).data
             }
 
-            cache.delete(phone)
+            cache.delete(phone_number)
             return Response(response_data)
+        else:
+            return Response({"error": "OTP not generated or expired."})
+
+
+class VerifyOtpView(APIView):
+    throttle_classes = [UserRateThrottle]
+    serializer_class = VerifyOTPSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request) -> Response:
+        user = request.user
+        otp = request.data.get('otp')
+        phone_number = user.phone
+        cache_otp = cache.get(phone_number)
+
+        if cache_otp == otp:
+            user.is_phone_verified = True
+            user.save()
+
         else:
             return Response({"error": "OTP not generated or expired."})
 
@@ -122,6 +142,6 @@ class VerifyOTPView(APIView):
 )
 class DecoratedTokenRefreshView(TokenRefreshView):
     permission_classes = [permissions.AllowAny]
-    
+
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
