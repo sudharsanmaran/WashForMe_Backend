@@ -7,7 +7,7 @@ from rest_framework import (
 
 from core.models import (
     Item,
-    WashCategory,
+    WashCategory, UserItem,
 )
 
 
@@ -21,5 +21,12 @@ class ItemSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = WashCategory
-        fields = ['id', 'name', 'extra_per_item', 'items']
+        fields = ['id', 'name', 'extra_per_item']
         read_only_fields = ['id']
+
+
+class UserItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserItem
+        fields = ['id', 'item', 'quantity', 'wash_category', 'price']
+        read_only_fields = ['id', 'user', 'price']

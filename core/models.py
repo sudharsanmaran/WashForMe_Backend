@@ -10,6 +10,7 @@ from django.db import models
 
 
 from WashForMe_Backend import settings
+from core.custom_model_fields import PositiveDecimalField, CustomPositiveInteger
 
 
 class UserManager(BaseUserManager):
@@ -53,6 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     dictionary = dict(availability='Yes', notifications='On', language='English', dark_mode='No')
     other_details = models.TextField(default=dictionary, blank=True)
+    total_price = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,7 +69,7 @@ class Item(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=55, unique=True)
     image = models.FileField(upload_to='images/', blank=True)
-    price = models.IntegerField(default=0)
+    price = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
     count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,8 +81,7 @@ class Item(models.Model):
 class WashCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=55, unique=True)
-    extra_per_item = models.IntegerField(default=0)
-    items = models.ManyToManyField(Item, blank=True)
+    extra_per_item = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -98,7 +99,7 @@ class Address(models.Model):
     address_line_2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=255)
     country = models.CharField(max_length=255)
-    pincode = models.IntegerField()
+    pincode = models.IntegerField(default=000000)
     type = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -108,6 +109,8 @@ class UserItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
+    wash_category = models.ForeignKey(WashCategory, on_delete=models.CASCADE)
+    quantity = CustomPositiveInteger(default=1)
+    price = PositiveDecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
