@@ -4,6 +4,10 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import permissions, status
+
+from drf_spectacular.utils import extend_schema
+from rest_framework_simplejwt.views import TokenRefreshView
+
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -16,7 +20,7 @@ from WashForMe_Backend import settings
 from core import models
 from core.api.serializers import (
     login_serializers,
-    user_serializer,
+    user_serializer
 )
 
 
@@ -28,6 +32,9 @@ def generate_otp():
     return str(random.randint(1000, 9999))
 
 
+@extend_schema(
+    tags=['accounts'],
+)
 class SendOTPView(APIView):
     """Generate otp and stores in phone number table."""
     throttle_classes = [UserRateThrottle]
@@ -67,6 +74,9 @@ class SendOTPView(APIView):
         return Response({'message': response['message']}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(
+    tags=['accounts'],
+)
 class VerifyOTPView(APIView):
     """Login OTP API View."""
     throttle_classes = [UserRateThrottle]
@@ -102,3 +112,16 @@ class VerifyOTPView(APIView):
             return Response(response_data)
         else:
             return Response({"error": "OTP not generated or expired."})
+
+
+@extend_schema(
+    tags=['accounts'],
+    responses={
+        status.HTTP_200_OK: login_serializers.TokenRefreshResponseSerializer,
+    }
+)
+class DecoratedTokenRefreshView(TokenRefreshView):
+    permission_classes = [permissions.AllowAny]
+    
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

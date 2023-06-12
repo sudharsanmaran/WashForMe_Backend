@@ -1,9 +1,4 @@
-"""
-Serializers for our application.
-"""
-
 from rest_framework import serializers
-
 
 class CreateOTPSerializer(serializers.Serializer):
     """Serializer for creating otp."""
@@ -15,3 +10,13 @@ class LoginOTPSerializer(serializers.Serializer):
     phone = serializers.CharField()
     otp = serializers.CharField()
 
+
+
+class TokenRefreshResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+
+    def create(self, validated_data):
+        raise NotImplementedError()
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError()

@@ -1,6 +1,3 @@
-"""
-Model in the app
-"""
 import uuid
 
 import phonenumbers as phonenumbers

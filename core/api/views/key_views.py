@@ -1,6 +1,3 @@
-"""
-Views for key classes.
-"""
 from rest_framework import (
     mixins,
     viewsets,

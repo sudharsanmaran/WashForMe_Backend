@@ -1,8 +1,5 @@
-"""
-Views for the user
-"""
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import (
-    permissions,
     generics,
     mixins,
     viewsets,
@@ -12,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
+from drf_spectacular.utils import extend_schema
 from core.api.serializers.user_serializer import (
     UserSerializer,
     AddressSerializer,
@@ -20,13 +18,15 @@ from core.api.views.login_views import SendOTPView, generate_otp
 from core.models import Address
 
 
-class UserDetailView(
-    generics.RetrieveUpdateAPIView
-):
+@extend_schema(
+    tags=['user'],
+)
+class UserDetailView(generics.RetrieveUpdateAPIView):
     """Retrieve and update user data."""
     throttle_classes = [UserRateThrottle]
+
+    permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
@@ -44,6 +44,9 @@ class UpdatePhone(APIView):
     throttle_classes = [UserRateThrottle]
 
 
+@extend_schema(
+    tags=['user'],
+)
 class AddressDetailsView(mixins.DestroyModelMixin,
                          mixins.UpdateModelMixin,
                          mixins.RetrieveModelMixin,
@@ -51,8 +54,7 @@ class AddressDetailsView(mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     """Base view set for the key attributes."""
     throttle_classes = [UserRateThrottle]
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = AddressSerializer
     queryset = Address.objects.all()
 
