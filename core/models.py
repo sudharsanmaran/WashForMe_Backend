@@ -1,6 +1,8 @@
 """
 Model in the app
 """
+import uuid
+
 import phonenumbers as phonenumbers
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -44,6 +46,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Customized user model"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(max_length=255, unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
@@ -52,6 +55,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     dictionary = dict(availability='Yes', notifications='On', language='English', dark_mode='No')
     other_details = models.TextField(default=dictionary, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = UserManager()
     USERNAME_FIELD = 'phone'
@@ -60,36 +65,33 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.phone
 
 
-class PhoneNumberManager(models.Model):
-    phone = models.CharField(max_length=255, unique=True)
-    otp = models.IntegerField()
-    count = models.IntegerField(default=0)
-    session_id = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f'{self.otp}'
-
-
 class Item(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=55, unique=True)
     image = models.FileField(upload_to='images/', blank=True)
     price = models.IntegerField()
     count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
 
-class Category(models.Model):
+class WashCategory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=55, unique=True)
     extra_per_item = models.IntegerField(default=0)
     items = models.ManyToManyField(Item, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
 
 class Address(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -100,3 +102,14 @@ class Address(models.Model):
     country = models.CharField(max_length=255)
     pincode = models.IntegerField()
     type = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class UserItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

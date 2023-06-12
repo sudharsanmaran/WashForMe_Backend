@@ -7,10 +7,11 @@ from rest_framework import (
     authentication,
     permissions,
 )
+from rest_framework.throttling import UserRateThrottle
 
 from core.models import (
     Item,
-    Category,
+    WashCategory,
 )
 from core.api.serializers.key_serializers import (
     ItemSerializer,
@@ -24,17 +25,20 @@ class BaseAttrViewSet(mixins.DestroyModelMixin,
                       mixins.CreateModelMixin,
                       viewsets.GenericViewSet):
     """Base view set for the key attributes."""
+    throttle_classes = [UserRateThrottle]
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
 
 class ItemView(BaseAttrViewSet):
     """Item model views."""
+    throttle_classes = [UserRateThrottle]
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
 
 
 class CategoryView(BaseAttrViewSet):
-    """Category model views."""
+    """WashCategory model views."""
+    throttle_classes = [UserRateThrottle]
     serializer_class = CategorySerializer
-    queryset = Category.objects.all()
+    queryset = WashCategory.objects.all()

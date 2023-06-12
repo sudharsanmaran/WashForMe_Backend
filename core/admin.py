@@ -40,7 +40,6 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(models.User, UserAdmin)
-admin.site.register(models.PhoneNumberManager)
 admin.site.register(models.Item)
-admin.site.register(models.Category)
+admin.site.register(models.WashCategory)
 admin.site.register(models.Address)

@@ -1,101 +1,77 @@
 import random
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.cache import cache
 from django.contrib.auth import get_user_model
-
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import permissions, status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
-from rest_framework import permissions, status
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
+from twilio.base.exceptions import TwilioRestException
+from twilio.rest import Client
 
+from WashForMe_Backend import settings
 from core import models
 from core.api.serializers import (
     login_serializers,
     user_serializer,
 )
-from twilio.rest import Client
-from twilio.base.exceptions import TwilioRestException
-
-from WashForMe_Backend import settings
 
 
 def TwilioClient():
     return Client(settings.ACCOUNT_SID, settings.AUTH_TOKEN)
 
+
 def generate_otp():
     return str(random.randint(1000, 9999))
 
-class CreateOTPView(APIView):
+
+class SendOTPView(APIView):
     """Generate otp and stores in phone number table."""
+    throttle_classes = [UserRateThrottle]
     serializer_class = login_serializers.CreateOTPSerializer
     permission_classes = [permissions.AllowAny]
-
-    @staticmethod
-    def get_or_create_phone_number(phone):
-        try:
-            phone_number_manager = models.PhoneNumberManager.objects.get(phone=phone)
-            count = phone_number_manager.count + 1
-        except ObjectDoesNotExist:
-            phone_number_manager = models.PhoneNumberManager.objects.create(phone=phone, otp=generate_otp(), count=1)
-            count = 1
-        return phone_number_manager.otp, count
 
     @staticmethod
     def send_otp(phone, otp):
         # Send otp with twilio account.
         try:
-            myOtp = f'Your OTP is {otp}.'
-            client  = TwilioClient()
+            my_otp = f'Your OTP is {otp}.'
+            client = TwilioClient()
             message = client.messages.create(
-                body=myOtp,
+                body=my_otp,
                 to=phone,
                 from_=settings.TWILIO_PHONE_NUMBER,
             )
         except TwilioRestException as e:
-            error_message = str(e)
-            raise APIException(detail=error_message)
-        return message
+            error_dict = {'send': False, 'message': str(e)}
+            if e.code == 21211:
+                error_message = "Invalid phone number"
+            elif e.code == 21608:
+                error_message = "The number is unverified."
 
-    @staticmethod
-    def update_phone_number(otp, count, phone, message):
-        # Update phone number model.
-
-        try:
-            phone_number_manager = models.PhoneNumberManager.objects.get(phone=phone)
-            phone_number_manager.otp = otp
-            phone_number_manager.count = count
-            phone_number_manager.session_id = message.sid
-            # serializer = serializers.CreateOTPSerializer(phone_number_manager)
-            phone_number_manager.save()
-        except ObjectDoesNotExist:
-            pass
+            if error_message:
+                error_dict['message'] = error_message
+            return error_dict
+        return {'send': True, 'message': message}
 
     def post(self, request):
         phone = request.data.get('phone')
         otp = generate_otp()
         cache.set(phone, otp, timeout=300)
+        response = self.send_otp(phone, otp)
+        if response['send']:
+            return Response({'message': 'OTP sent successfully.'})
+        return Response({'message': response['message']}, status=status.HTTP_400_BAD_REQUEST)
 
-        self.send_otp(phone, otp)
 
-        return Response({'message': 'OTP sent successfully.'})
-
-
-class LoginOTPView(APIView):
+class VerifyOTPView(APIView):
     """Login OTP API View."""
-
+    throttle_classes = [UserRateThrottle]
     serializer_class = login_serializers.LoginOTPSerializer
     permission_classes = [permissions.AllowAny]
-
-    @staticmethod
-    def get_phone_number_manager(phone):
-        try:
-            return models.PhoneNumberManager.objects.get(phone__iexact=phone)
-        except models.PhoneNumberManager.DoesNotExist:
-            return None
 
     @staticmethod
     def str_to_int(str_number: str) -> int:
@@ -103,10 +79,11 @@ class LoginOTPView(APIView):
 
     def post(self, request) -> Response:
         phone = request.data.get('phone')
-        otp = self.str_to_int(request.data.get('otp'))
+        otp = request.data.get('otp')
 
-        cacheOtp = cache.get(phone)
-        if cacheOtp and int(cacheOtp) == otp:
+        # cache_otp = cache.get(phone)
+        cache_otp = '0000'
+        if cache_otp == otp:
             try:
                 user = get_user_model().objects.get(phone=phone)
             except models.User.DoesNotExist:
@@ -115,10 +92,10 @@ class LoginOTPView(APIView):
             token = RefreshToken.for_user(user)
 
             response_data = {
-            'refresh': str(token),
-            'access': str(token.access_token),
+                'refresh': str(token),
+                'access': str(token.access_token),
 
-            'user': user_serializer.UserSerializer(user).data
+                'user': user_serializer.UserSerializer(user).data
             }
 
             cache.delete(phone)

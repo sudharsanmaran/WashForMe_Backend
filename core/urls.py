@@ -5,8 +5,8 @@ from django.urls import path, include
 
 
 from core.api.views.login_views import (
-    CreateOTPView,
-    LoginOTPView,
+    SendOTPView,
+    VerifyOTPView,
 )
 from core.api.views.key_views import (
     ItemView,
@@ -29,7 +29,7 @@ app_name = 'core'
 urlpatterns = [
     path('', include(router.urls)),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('send_otp/', CreateOTPView.as_view(), name='send-otp'),
-    path('check_otp/', LoginOTPView.as_view(), name='check-otp'),
+    path('send_otp/', SendOTPView.as_view(), name='send-otp'),
+    path('check_otp/', VerifyOTPView.as_view(), name='check-otp'),
     path('user_details/', UserDetailView.as_view(), name='user-details'),
 ]
