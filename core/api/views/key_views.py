@@ -168,7 +168,9 @@ class ShopDetailsView(BaseAttrViewSet):
 #     def perform_create(self, serializer):
 #         serializer.save(user=self.request.user)
 
-
+@extend_schema(
+    tags=['cron job'],
+)
 class SampleCron(APIView):
     def get(self, request, *args, **kwargs):
         update_timeslots()
