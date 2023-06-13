@@ -1,0 +1,1 @@
+TIMESLOTS_DAYS = 7

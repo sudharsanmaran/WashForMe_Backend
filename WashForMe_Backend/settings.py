@@ -1,6 +1,6 @@
-import os
 from datetime import timedelta
 from pathlib import Path
+
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,9 +33,9 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'drf_spectacular',
     'rest_framework',
-    'rest_framework.authtoken',
     'rest_framework_simplejwt',
-    'storages'
+    'storages',
+    'django_crontab',
 ]
 
 MY_APPS = [
@@ -126,7 +126,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'core.User'
 
-
 ACCOUNT_SID = env('ACCOUNT_SID')
 AUTH_TOKEN = env('AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER')
@@ -161,3 +160,6 @@ AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH = False
 
+CRONJOBS = [
+    ('0 0 * * *', 'core.cron.update_timeslots'),
+]

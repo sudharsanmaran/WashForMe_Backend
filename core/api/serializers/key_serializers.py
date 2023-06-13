@@ -7,7 +7,7 @@ from rest_framework import (
 
 from core.models import (
     Item,
-    WashCategory, UserItem,
+    WashCategory, UserItem, Shop, Review, Timeslot,
 )
 
 
@@ -30,3 +30,28 @@ class UserItemSerializer(serializers.ModelSerializer):
         model = UserItem
         fields = ['id', 'item', 'quantity', 'wash_category', 'price']
         read_only_fields = ['id', 'user', 'price']
+
+
+class ShopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        exclude = ['created_at', 'updated_at', 'user']
+        read_only_fields = ['id']
+
+
+class ShopReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        exclude = ['created_at', 'updated_at', 'user']
+        read_only_fields = ['id']
+
+
+class TimeslotQuerySerializer(serializers.Serializer):
+    start_datetime = serializers.DateTimeField()
+    end_datetime = serializers.DateTimeField()
+
+
+class TimeslotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Timeslot
+        fields = '__all__'
