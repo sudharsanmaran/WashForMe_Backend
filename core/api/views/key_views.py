@@ -1,24 +1,28 @@
 import uuid
+from datetime import datetime
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import (
     permissions,
     generics,
     status,
 )
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
+from rest_framework.views import APIView
 
 from core.api.serializers.key_serializers import (
     ItemSerializer,
-    CategorySerializer, UserItemSerializer,
+    CategorySerializer, UserItemSerializer, ShopSerializer, TimeslotSerializer,
 )
 from core.custom_view_sets import BaseAttrViewSet
 from core.models import (
     Item,
-    WashCategory, UserItem,
+    WashCategory, UserItem, Shop, Timeslot,
 )
 from .user_views import UserDetailView
+from ...cron import update_timeslots
 
 
 @extend_schema(
@@ -137,3 +141,71 @@ class UserItemListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
         instance.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+@extend_schema(
+    tags=['Timeslots'],
+    parameters=[
+        OpenApiParameter(name='start_datetime', type=str),
+        OpenApiParameter(name='end_datetime', type=str),
+    ]
+)
+
+@extend_schema(
+    tags=['Shop Details'],
+)
+class ShopDetailsView(BaseAttrViewSet):
+    """AddressDetails model views."""
+    serializer_class = ShopSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Shop.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+# @extend_schema(
+#     tags=['Shop Review'],
+# )
+# class ShopReviewView(BaseAttrViewSet):
+#     """AddressDetails model views."""
+#     serializer_class = ShopReviewSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#     queryset = Review.objects.all()
+#
+#     def perform_create(self, serializer):
+#         serializer.save(user=self.request.user)
+
+
+class SampleCron(APIView):
+    def get(self, request, *args, **kwargs):
+        update_timeslots()
+        return Response(status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    tags=['Timeslots'],
+    parameters=[
+        OpenApiParameter(name='start_datetime', type=str),
+        OpenApiParameter(name='end_datetime', type=str),
+    ]
+)
+class TimeslotListAPIView(generics.ListAPIView):
+    serializer_class = TimeslotSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        try:
+            start_datetime = datetime.strptime(self.request.query_params.get('start_datetime'), '%Y-%m-%d')
+            end_datetime = datetime.strptime(self.request.query_params.get('end_datetime'), '%Y-%m-%d')
+        except Exception as e:
+            raise ValidationError('parameters must be in date format like \'2023-12-24\'')
+
+        queryset = Timeslot.objects.all()
+
+        if start_datetime:
+            queryset = queryset.filter(start_datetime__gte=start_datetime)
+        if end_datetime:
+            queryset = queryset.filter(end_datetime__lte=end_datetime)
+
+        return queryset
