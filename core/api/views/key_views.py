@@ -126,3 +126,14 @@ class UserItemListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
         instance.save()
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        return self.patch(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        UserDetailView.update_user_total_price(user, instance.price, increment=False)
+        instance.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

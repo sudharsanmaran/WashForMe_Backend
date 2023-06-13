@@ -61,7 +61,6 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
 )
 class AddressDetailsView(BaseAttrViewSet):
     """AddressDetails model views."""
-    throttle_classes = [UserRateThrottle]
     serializer_class = AddressSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Address.objects.all()
