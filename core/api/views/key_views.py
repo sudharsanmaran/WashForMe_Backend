@@ -66,10 +66,15 @@ class UserItemListCreateView(generics.ListCreateAPIView):
         return (UserItemListCreateView.item_price(item_id) +
                 UserItemListCreateView.wash_category_price(wash_category_id)) * quantity
 
-    @staticmethod
-    def update_user_item(self, item_id, quantity, request, user, wash_category_id) -> Response:
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        item_id = request.data.get('item')
+        wash_category_id = request.data.get('wash_category')
+        quantity = int(request.data.get('quantity', 1))
+
         calculated_price = UserItemListCreateView.calculate_price(item_id, wash_category_id, quantity)
         UserDetailView.update_user_total_price(user, calculated_price, increment=True)
+
         existing_user_item = UserItem.objects.filter(user=user, item_id=item_id,
                                                      wash_category_id=wash_category_id).first()
         if existing_user_item:
@@ -84,14 +89,6 @@ class UserItemListCreateView(generics.ListCreateAPIView):
             serializer.save(user=user, price=calculated_price)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        item_id = request.data.get('item')
-        wash_category_id = request.data.get('wash_category')
-        quantity = int(request.data.get('quantity', 1))
-
-        return UserItemListCreateView.update_user_item(item_id, quantity, request, user, wash_category_id)
 
 
 @extend_schema(
@@ -113,5 +110,19 @@ class UserItemListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
+        if not wash_category_id:
+            wash_category_id = instance.wash_category_id
+        if not item_id:
+            item_id = instance.item_id
+
         UserDetailView.update_user_total_price(user, instance.price, increment=False)
-        UserItemListCreateView.update_user_item(item_id, quantity, request, user, wash_category_id)
+        calculated_price = UserItemListCreateView.calculate_price(item_id, wash_category_id, quantity)
+        UserDetailView.update_user_total_price(user, calculated_price, increment=True)
+
+        instance.quantity = quantity
+        instance.price = calculated_price
+        instance.item_id = item_id
+        instance.wash_category_id = wash_category_id
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
