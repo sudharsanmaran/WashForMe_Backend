@@ -14,14 +14,16 @@ from rest_framework.views import APIView
 
 from core.api.serializers.key_serializers import (
     ItemSerializer,
-    CategorySerializer, UserItemSerializer, ShopSerializer, TimeslotSerializer,
+    CategorySerializer, UserItemSerializer, ShopSerializer, TimeslotSerializer, BookingSerializer,
+    BookingRequestSerializer,
 )
 from core.custom_view_sets import BaseAttrViewSet
 from core.models import (
     Item,
-    WashCategory, UserItem, Shop, Timeslot,
+    WashCategory, UserItem, Shop, Timeslot, Booking,
 )
 from .user_views import UserDetailView
+from ...constants import TIMESLOTS_DAYS, BookingType
 from ...cron import update_timeslots
 from ...signals import create_shop_timeslots_signal, delete_shop_timeslots_signal
 
@@ -192,12 +194,12 @@ class ShopDetailsView(BaseAttrViewSet):
 #         serializer.save(user=self.request.user)
 
 @extend_schema(
-    tags=['cron job'],
+    tags=['Timeslots'],
 )
-class SampleCron(APIView):
-    def get(self, request, *args, **kwargs):
+class UpdateTimeslots(APIView):
+    def put(self, request, *args, **kwargs):
         update_timeslots()
-        return Response(status=status.HTTP_200_OK)
+        return Response(data=f'timeslots for all shop are updated for {TIMESLOTS_DAYS} days', status=status.HTTP_200_OK)
 
 
 @extend_schema(
@@ -210,6 +212,7 @@ class SampleCron(APIView):
     ]
 )
 class PickupTimeslotListAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TimeslotSerializer
 
     def get(self, request, *args, **kwargs):
@@ -251,6 +254,7 @@ class PickupTimeslotListAPIView(generics.ListAPIView):
     ]
 )
 class DeliveryTimeslotListAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TimeslotSerializer
 
     def get(self, request, *args, **kwargs):
@@ -280,3 +284,60 @@ class DeliveryTimeslotListAPIView(generics.ListAPIView):
             queryset = queryset.filter(delivery_available_quota__gte=1)
 
         return queryset
+
+
+@extend_schema(
+    tags=['Booking'],
+    request=BookingRequestSerializer,
+    responses={status.HTTP_201_CREATED: BookingSerializer}
+)
+class BookingAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = BookingSerializer
+
+    def post(self, request):
+        request_serializer = BookingRequestSerializer(data=request.data)
+        if request_serializer.is_valid():
+            validated_data = request_serializer.validated_data
+            timeslot_id = validated_data['timeslot_id']
+            booking_type = validated_data['booking_type']
+            user_id = request.user.id
+
+            if Booking.objects.filter(time_slot=timeslot_id, user=user_id).exists():
+                return Response({'error': 'User has already booked this timeslot'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                timeslot = Timeslot.objects.get(id=timeslot_id)
+            except Timeslot.DoesNotExist:
+                return Response({'error': 'Invalid timeslot ID'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if booking_type == BookingType.PICK_UP.value:
+                if timeslot.pickup_available_quota <= 0:
+                    return Response({'error': 'No available pickup quota for this timeslot'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    timeslot.pickup_available_quota -= 1
+            elif booking_type == BookingType.DELIVERY.value:
+                if timeslot.delivery_available_quota <= 0:
+                    return Response({'error': 'No available delivery quota for this timeslot'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    timeslot.delivery_available_quota -= 1
+
+            booking_data = {
+                'time_slot': timeslot_id,
+                'user': user_id,
+                'booking_type': BookingType(booking_type).value,
+            }
+            response_serializer = BookingSerializer(data=booking_data)
+
+            if response_serializer.is_valid():
+                booking = response_serializer.save()
+                timeslot.save()
+                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(response_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

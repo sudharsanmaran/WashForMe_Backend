@@ -11,6 +11,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from WashForMe_Backend import settings
+from core.constants import BookingType
 from core.custom_model_fields import PositiveDecimalField, CustomPositiveInteger
 
 
@@ -149,6 +150,7 @@ class Booking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time_slot = models.ForeignKey(Timeslot, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    booking_type = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

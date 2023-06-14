@@ -1,1 +1,0 @@
-TIMESLOTS_DAYS = 9

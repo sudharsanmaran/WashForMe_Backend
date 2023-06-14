@@ -1,13 +1,15 @@
 import time
 from datetime import timedelta, datetime, date
+from typing import List, Tuple
 
 from django.utils.timezone import make_aware
 
-from core.constans import TIMESLOTS_DAYS
+from core.constants import TIMESLOTS_DAYS
 from core.models import Shop, Timeslot
 
 
-def generate_timeslots(opening_time: time, closing_time: time, timeslot_duration: timedelta, start_date: date):
+def generate_timeslots(opening_time: time, closing_time: time, timeslot_duration: timedelta,
+                       start_date: date) -> List[Tuple[datetime, datetime]]:
     timeslots = []
     current_date = start_date
     current_datetime = datetime.combine(current_date, opening_time)

@@ -5,9 +5,10 @@ from rest_framework import (
     serializers,
 )
 
+from core.constants import BookingType
 from core.models import (
     Item,
-    WashCategory, UserItem, Shop, Review, Timeslot,
+    WashCategory, UserItem, Shop, Review, Timeslot, Booking,
 )
 
 
@@ -55,3 +56,40 @@ class TimeslotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Timeslot
         fields = '__all__'
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['id', 'time_slot', 'user', 'booking_type']
+        read_only_fields = ['id']
+
+
+class BookingRequestSerializer(serializers.Serializer):
+    timeslot_id = serializers.IntegerField()
+    booking_type = serializers.ChoiceField(
+        choices=[(BookingType.PICK_UP.value, 'pick_up'), (BookingType.DELIVERY.value, 'delivery')])
+
+    def validate(self, attrs):
+        timeslot_id = attrs.get('timeslot_id')
+        booking_type = attrs.get('booking_type')
+
+        # Perform validation logic
+        if not timeslot_id:
+            raise serializers.ValidationError("timeslot_id is required.")
+        if not booking_type:
+            raise serializers.ValidationError("booking_type is required.")
+
+        # Validate booking_type against BookingType enum
+        try:
+            booking_type = BookingType(booking_type)
+        except ValueError:
+            raise serializers.ValidationError("Invalid booking_type.")
+
+        # Validate timeslot_id against existing Timeslot objects
+        try:
+            timeslot = Timeslot.objects.get(id=timeslot_id)
+        except Timeslot.DoesNotExist:
+            raise serializers.ValidationError("Invalid timeslot_id.")
+
+        return attrs
