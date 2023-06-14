@@ -28,23 +28,34 @@ def generate_timeslots(opening_time: time, closing_time: time, timeslot_duration
     return timeslots
 
 
+def delete_shop_timeslots(shop_id: int) -> None:
+    Timeslot.objects.filter(shop_id=shop_id).delete()
+
+
 def delete_older_time_slots():
     pass
 
 
-def update_timeslots():
-    shops = Shop.objects.all()
+def generate_unique_id(int_timestamp: int, shop_id: int) -> int:
+    return int(str(int_timestamp) + str(shop_id))
+
+
+def update_timeslots(shop_id: int = None):
+    if shop_id:
+        shops = Shop.objects.filter(pk=shop_id)
+    else:
+        shops = Shop.objects.all()
     for shop in shops:
         timeslots = generate_timeslots(shop.opening_time, shop.closing_time, shop.time_slot_duration,
                                        datetime.now().date())
         # generate unique id based on start datetime to ignore conflicts
         timeslots_objects = [Timeslot(
-            id=int(time.mktime(timeslot[0].timetuple())),
+            id=generate_unique_id(int(time.mktime(timeslot[0].timetuple())), shop.id),
             start_datetime=make_aware(timeslot[0]),
             end_datetime=make_aware(timeslot[1]),
             available_quota=shop.max_user_limit_per_time_slot,
             shop=shop
         ) for timeslot in timeslots]
 
-        Timeslot.objects.bulk_create(timeslots_objects, ignore_conflicts=True)
+        Timeslot.objects.bulk_create(timeslots_objects, ignore_conflicts=True, unique_fields=['id'])
     return

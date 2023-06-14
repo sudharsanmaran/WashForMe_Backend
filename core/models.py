@@ -118,7 +118,6 @@ class UserItem(models.Model):
 
 
 class Shop(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     opening_time = models.TimeField(validators=[MinValueValidator(time(6, 0)),
@@ -142,7 +141,7 @@ class Timeslot(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['start_datetime']
+        ordering = ['shop', 'start_datetime']
 
 
 class Booking(models.Model):

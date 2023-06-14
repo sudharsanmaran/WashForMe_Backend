@@ -23,6 +23,7 @@ from core.models import (
 )
 from .user_views import UserDetailView
 from ...cron import update_timeslots
+from ...signals import create_shop_timeslots_signal, delete_shop_timeslots_signal
 
 
 @extend_schema(
@@ -153,7 +154,29 @@ class ShopDetailsView(BaseAttrViewSet):
     queryset = Shop.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        shop = serializer.save(user=self.request.user)
+        create_shop_timeslots_signal.send(sender=self.__class__, shop=shop)
+
+    def perform_update(self, serializer):
+        shop_before_update = self.get_object()
+        serialized_data_before_update = serializer.to_representation(shop_before_update)
+
+        shop = serializer.save()
+
+        serialized_data_after_update = serializer.data
+
+        fields_to_check = ['active', 'opening_time', 'closing_time', 'wash_duration', 'time_slot_duration',
+                           'max_user_limit_per_time_slot']
+
+        if any(serialized_data_before_update[field] != serialized_data_after_update[field] for field in
+               fields_to_check):
+            delete_shop_timeslots_signal.send(sender=self.__class__, shop=shop)
+            if shop.active:
+                create_shop_timeslots_signal.send(sender=self.__class__, shop=shop)
+
+    def perform_destroy(self, instance):
+        delete_shop_timeslots_signal.send(sender=self.__class__, shop=instance)
+        instance.delete()
 
 
 # @extend_schema(
@@ -182,6 +205,8 @@ class SampleCron(APIView):
     parameters=[
         OpenApiParameter(name='start_datetime', type=str),
         OpenApiParameter(name='end_datetime', type=str),
+        OpenApiParameter(name='shop_id', type=str),
+        OpenApiParameter(name='is_available', type=bool),
     ]
 )
 class TimeslotListAPIView(generics.ListAPIView):
@@ -191,10 +216,16 @@ class TimeslotListAPIView(generics.ListAPIView):
         return self.list(request, *args, **kwargs)
 
     def get_queryset(self):
+        start_datetime = self.request.query_params.get('start_datetime')
+        end_datetime = self.request.query_params.get('end_datetime')
+        shop_id = self.request.query_params.get('shop_id')
+        is_available = bool(self.request.query_params.get('is_available') == 'true')
         try:
-            start_datetime = datetime.strptime(self.request.query_params.get('start_datetime'), '%Y-%m-%d')
-            end_datetime = datetime.strptime(self.request.query_params.get('end_datetime'), '%Y-%m-%d')
-        except Exception as e:
+            if start_datetime:
+                start_datetime = datetime.strptime(start_datetime, '%Y-%m-%d')
+            if end_datetime:
+                end_datetime = datetime.strptime(end_datetime, '%Y-%m-%d')
+        except ValueError:
             raise ValidationError('parameters must be in date format like \'2023-12-24\'')
 
         queryset = Timeslot.objects.all()
@@ -203,5 +234,9 @@ class TimeslotListAPIView(generics.ListAPIView):
             queryset = queryset.filter(start_datetime__gte=start_datetime)
         if end_datetime:
             queryset = queryset.filter(end_datetime__lte=end_datetime)
+        if shop_id:
+            queryset = queryset.filter(shop_id=shop_id)
+        if is_available:
+            queryset = queryset.filter(available_quota__gte=1)
 
         return queryset
