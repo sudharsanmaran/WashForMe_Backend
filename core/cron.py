@@ -53,7 +53,8 @@ def update_timeslots(shop_id: int = None):
             id=generate_unique_id(int(time.mktime(timeslot[0].timetuple())), shop.id),
             start_datetime=make_aware(timeslot[0]),
             end_datetime=make_aware(timeslot[1]),
-            available_quota=shop.max_user_limit_per_time_slot,
+            pickup_available_quota=shop.max_user_limit_per_time_slot,
+            delivery_available_quota=shop.max_user_limit_per_time_slot,
             shop=shop
         ) for timeslot in timeslots]
 

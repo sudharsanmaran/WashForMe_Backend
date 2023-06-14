@@ -137,7 +137,8 @@ class Shop(models.Model):
 class Timeslot(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
-    available_quota = models.PositiveIntegerField()
+    pickup_available_quota = models.PositiveIntegerField()
+    delivery_available_quota = models.PositiveIntegerField()
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
 
     class Meta:
