@@ -36,9 +36,9 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
     @staticmethod
     def update_user_total_price(user: settings.AUTH_USER_MODEL, price: float, increment: bool) -> None:
         if increment:
-            user.total_price += price
+            user.cart_total_price += price
         else:
-            user.total_price -= price
+            user.cart_total_price -= price
         user.save()
         return
 

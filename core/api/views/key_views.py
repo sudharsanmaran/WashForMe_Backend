@@ -8,19 +8,20 @@ from rest_framework import (
     status,
 )
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
 from core.api.serializers.key_serializers import (
     ItemSerializer,
-    CategorySerializer, UserItemSerializer, ShopSerializer, TimeslotSerializer, BookingSerializer,
+    CategorySerializer, CartSerializer, ShopSerializer, TimeslotSerializer, BookingSerializer,
     BookingRequestSerializer,
 )
 from core.custom_view_sets import BaseAttrViewSet
 from core.models import (
     Item,
-    WashCategory, UserItem, Shop, Timeslot, Booking,
+    WashCategory, Cart, Shop, Timeslot, BookTimeslot,
 )
 from .user_views import UserDetailView
 from ...constants import TIMESLOTS_DAYS, BookingType
@@ -48,11 +49,11 @@ class CategoryView(BaseAttrViewSet):
     queryset = WashCategory.objects.all()
 
 
-@extend_schema(tags=['User Item'])
-class UserItemListCreateView(generics.ListCreateAPIView):
+@extend_schema(tags=['Cart'])
+class CartListCreateView(generics.ListCreateAPIView):
     throttle_classes = [UserRateThrottle]
-    queryset = UserItem.objects.all()
-    serializer_class = UserItemSerializer
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -70,8 +71,8 @@ class UserItemListCreateView(generics.ListCreateAPIView):
 
     @staticmethod
     def calculate_price(item_id: uuid.UUID, wash_category_id: uuid.UUID, quantity: int) -> float:
-        return (UserItemListCreateView.item_price(item_id) +
-                UserItemListCreateView.wash_category_price(wash_category_id)) * quantity
+        return (CartListCreateView.item_price(item_id) +
+                CartListCreateView.wash_category_price(wash_category_id)) * quantity
 
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -79,11 +80,11 @@ class UserItemListCreateView(generics.ListCreateAPIView):
         wash_category_id = request.data.get('wash_category')
         quantity = int(request.data.get('quantity', 1))
 
-        calculated_price = UserItemListCreateView.calculate_price(item_id, wash_category_id, quantity)
+        calculated_price = CartListCreateView.calculate_price(item_id, wash_category_id, quantity)
         UserDetailView.update_user_total_price(user, calculated_price, increment=True)
 
-        existing_user_item = UserItem.objects.filter(user=user, item_id=item_id,
-                                                     wash_category_id=wash_category_id).first()
+        existing_user_item = Cart.objects.filter(user=user, item_id=item_id,
+                                                 wash_category_id=wash_category_id).first()
         if existing_user_item:
             existing_user_item.quantity += quantity
             existing_user_item.price += calculated_price
@@ -99,12 +100,12 @@ class UserItemListCreateView(generics.ListCreateAPIView):
 
 
 @extend_schema(
-    tags=['User Item'],
+    tags=['Cart'],
 )
-class UserItemListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class CartListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     throttle_classes = [UserRateThrottle]
-    queryset = UserItem.objects.all()
-    serializer_class = UserItemSerializer
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
 
@@ -123,7 +124,7 @@ class UserItemListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
             item_id = instance.item_id
 
         UserDetailView.update_user_total_price(user, instance.price, increment=False)
-        calculated_price = UserItemListCreateView.calculate_price(item_id, wash_category_id, quantity)
+        calculated_price = CartListCreateView.calculate_price(item_id, wash_category_id, quantity)
         UserDetailView.update_user_total_price(user, calculated_price, increment=True)
 
         instance.quantity = quantity
@@ -212,6 +213,7 @@ class UpdateTimeslots(APIView):
     ]
 )
 class PickupTimeslotListAPIView(generics.ListAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = TimeslotSerializer
 
@@ -233,9 +235,9 @@ class PickupTimeslotListAPIView(generics.ListAPIView):
 
         queryset = Timeslot.objects.all()
 
-        if start_datetime:
+        if start_date and start_datetime:
             queryset = queryset.filter(start_datetime__gte=start_datetime)
-        if end_datetime:
+        if end_date and end_datetime:
             queryset = queryset.filter(end_datetime__lte=end_datetime)
         if shop_id:
             queryset = queryset.filter(shop_id=shop_id)
@@ -254,6 +256,7 @@ class PickupTimeslotListAPIView(generics.ListAPIView):
     ]
 )
 class DeliveryTimeslotListAPIView(generics.ListAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = TimeslotSerializer
 
@@ -287,11 +290,12 @@ class DeliveryTimeslotListAPIView(generics.ListAPIView):
 
 
 @extend_schema(
-    tags=['Booking'],
+    tags=['BookTimeslot'],
     request=BookingRequestSerializer,
     responses={status.HTTP_201_CREATED: BookingSerializer}
 )
 class BookingAPIView(APIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = BookingSerializer
 
@@ -301,16 +305,14 @@ class BookingAPIView(APIView):
             validated_data = request_serializer.validated_data
             timeslot_id = validated_data['timeslot_id']
             booking_type = validated_data['booking_type']
+            address_id = validated_data['address_id']
             user_id = request.user.id
 
-            if Booking.objects.filter(time_slot=timeslot_id, user=user_id).exists():
+            if BookTimeslot.objects.filter(time_slot=timeslot_id, user=user_id).exists():
                 return Response({'error': 'User has already booked this timeslot'},
                                 status=status.HTTP_400_BAD_REQUEST)
 
-            try:
-                timeslot = Timeslot.objects.get(id=timeslot_id)
-            except Timeslot.DoesNotExist:
-                return Response({'error': 'Invalid timeslot ID'}, status=status.HTTP_400_BAD_REQUEST)
+            timeslot = Timeslot.objects.get(id=timeslot_id)
 
             if booking_type == BookingType.PICK_UP.value:
                 if timeslot.pickup_available_quota <= 0:
@@ -318,6 +320,7 @@ class BookingAPIView(APIView):
                                     status=status.HTTP_400_BAD_REQUEST)
                 else:
                     timeslot.pickup_available_quota -= 1
+
             elif booking_type == BookingType.DELIVERY.value:
                 if timeslot.delivery_available_quota <= 0:
                     return Response({'error': 'No available delivery quota for this timeslot'},
@@ -328,6 +331,7 @@ class BookingAPIView(APIView):
             booking_data = {
                 'time_slot': timeslot_id,
                 'user': user_id,
+                'address': address_id,
                 'booking_type': BookingType(booking_type).value,
             }
             response_serializer = BookingSerializer(data=booking_data)
@@ -341,3 +345,12 @@ class BookingAPIView(APIView):
 
         return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@extend_schema(
+    tags=['BookTimeslot'],
+)
+class BookingListView(ListAPIView):
+    throttle_classes = [UserRateThrottle]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = BookingSerializer
+    queryset = BookTimeslot.objects.all()

@@ -2,16 +2,13 @@ import random
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from rest_framework import permissions, status
-
 from drf_spectacular.utils import extend_schema
-from rest_framework_simplejwt.views import TokenRefreshView
-
-from rest_framework.exceptions import APIException
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 
@@ -88,33 +85,37 @@ class OTPLoginView(APIView):
         return int(str_number) if str_number.isnumeric else str_number
 
     def post(self, request) -> Response:
-        phone_number = request.data.get('phone')
-        otp = request.data.get('otp')
-        cache_otp = cache.get(phone_number)
-        # todo replace below line
-        cache_otp = '0000'
-        if cache_otp == otp:
-            try:
-                user = get_user_model().objects.get(phone=phone_number)
-            except models.User.DoesNotExist:
-                user = get_user_model().objects.create_user(phone=phone_number, is_phone_verified=True)
+        serializer = login_serializers.LoginOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            phone_number = request.data.get('phone')
+            otp = request.data.get('otp')
+            cache_otp = cache.get(phone_number)
+            # todo replace below line
+            cache_otp = '0000'
+            if cache_otp == otp:
+                try:
+                    user = get_user_model().objects.get(phone=phone_number)
+                except models.User.DoesNotExist:
+                    user = get_user_model().objects.create_user(phone=phone_number, is_phone_verified=True)
 
-            user.is_phone_verified = True
-            user.save()
+                user.is_phone_verified = True
+                user.save()
 
-            token = RefreshToken.for_user(user)
+                token = RefreshToken.for_user(user)
 
-            response_data = {
-                'refresh': str(token),
-                'access': str(token.access_token),
+                response_data = {
+                    'refresh': str(token),
+                    'access': str(token.access_token),
 
-                'user': user_serializer.UserSerializer(user).data
-            }
+                    'user': user_serializer.UserSerializer(user).data
+                }
 
-            cache.delete(phone_number)
-            return Response(response_data)
+                cache.delete(phone_number)
+                return Response(response_data)
+            else:
+                return Response({"error": "OTP not generated or expired."})
         else:
-            return Response({"error": "OTP not generated or expired."})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(

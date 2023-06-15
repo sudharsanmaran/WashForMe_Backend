@@ -11,7 +11,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from WashForMe_Backend import settings
-from core.constants import BookingType
 from core.custom_model_fields import PositiveDecimalField, CustomPositiveInteger
 
 
@@ -56,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     dictionary = dict(availability='Yes', notifications='On', language='English', dark_mode='No')
     other_details = models.TextField(default=dictionary, blank=True)
-    total_price = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
+    cart_total_price = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -73,6 +72,7 @@ class Item(models.Model):
     image = models.FileField(upload_to='images/', blank=True)
     price = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
     count = models.IntegerField(default=0)
+    extras = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -107,7 +107,7 @@ class Address(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class UserItem(models.Model):
+class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -146,10 +146,11 @@ class Timeslot(models.Model):
         ordering = ['shop', 'start_datetime']
 
 
-class Booking(models.Model):
+class BookTimeslot(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time_slot = models.ForeignKey(Timeslot, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    address = models.ForeignKey(Address, on_delete=models.CASCADE)
     booking_type = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -8,14 +8,14 @@ from rest_framework import (
 from core.constants import BookingType
 from core.models import (
     Item,
-    WashCategory, UserItem, Shop, Review, Timeslot, Booking,
+    WashCategory, Cart, Shop, Review, Timeslot, BookTimeslot, Address,
 )
 
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ['id', 'name', 'image', 'price', 'count']
+        fields = ['id', 'name', 'image', 'price', 'count', 'extras']
         read_only_fields = ['id', 'count']
 
 
@@ -26,9 +26,9 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-class UserItemSerializer(serializers.ModelSerializer):
+class CartSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserItem
+        model = Cart
         fields = ['id', 'item', 'quantity', 'wash_category', 'price']
         read_only_fields = ['id', 'user', 'price']
 
@@ -60,25 +60,21 @@ class TimeslotSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Booking
-        fields = ['id', 'time_slot', 'user', 'booking_type']
+        model = BookTimeslot
+        fields = ['id', 'time_slot', 'user', 'booking_type', 'address']
         read_only_fields = ['id']
 
 
 class BookingRequestSerializer(serializers.Serializer):
-    timeslot_id = serializers.IntegerField()
+    timeslot_id = serializers.IntegerField(required=True)
+    address_id = serializers.UUIDField(required=True)
     booking_type = serializers.ChoiceField(
-        choices=[(BookingType.PICK_UP.value, 'pick_up'), (BookingType.DELIVERY.value, 'delivery')])
+        choices=[(BookingType.PICK_UP.value, 'pick_up'), (BookingType.DELIVERY.value, 'delivery')], required=True)
 
     def validate(self, attrs):
         timeslot_id = attrs.get('timeslot_id')
         booking_type = attrs.get('booking_type')
-
-        # Perform validation logic
-        if not timeslot_id:
-            raise serializers.ValidationError("timeslot_id is required.")
-        if not booking_type:
-            raise serializers.ValidationError("booking_type is required.")
+        address_id = attrs.get('address_id')
 
         # Validate booking_type against BookingType enum
         try:
@@ -91,5 +87,11 @@ class BookingRequestSerializer(serializers.Serializer):
             timeslot = Timeslot.objects.get(id=timeslot_id)
         except Timeslot.DoesNotExist:
             raise serializers.ValidationError("Invalid timeslot_id.")
+
+        # Validate address_id against existing Address objects
+        try:
+            address = Address.objects.get(id=address_id)
+        except Address.DoesNotExist:
+            raise serializers.ValidationError("Invalid address_id.")
 
         return attrs

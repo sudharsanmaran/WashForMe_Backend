@@ -11,9 +11,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'other_details', 'is_phone_verified',
-                  'total_price']
+                  'cart_total_price']
         write_only_fields = ['first_name', 'last_name', 'email']
-        read_only_fields = ['id', 'is_phone_verified', 'total_price']
+        read_only_fields = ['id', 'is_phone_verified', 'cart_total_price']
 
 
 class AddressSerializer(serializers.ModelSerializer):
