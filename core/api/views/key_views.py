@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import (
     permissions,
     generics,
-    status,
+    status, viewsets,
 )
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
@@ -16,17 +16,17 @@ from rest_framework.views import APIView
 from core.api.serializers.key_serializers import (
     ItemSerializer,
     CategorySerializer, CartSerializer, ShopSerializer, TimeslotSerializer, BookingSerializer,
-    BookingRequestSerializer,
+    PaymentSerializer, OrderSerializer,
 )
 from core.custom_view_sets import BaseAttrViewSet
 from core.models import (
     Item,
-    WashCategory, Cart, Shop, Timeslot, BookTimeslot,
+    WashCategory, Cart, Shop, Timeslot, BookTimeslot, Payment, Order,
 )
 from .user_views import UserDetailView
-from ...constants import TIMESLOTS_DAYS, BookingType
+from ...constants import TIMESLOTS_DAYS, BookingType, PaymentStatus
 from ...cron import update_timeslots
-from ...signals import create_shop_timeslots_signal, delete_shop_timeslots_signal
+from ...signals import create_shop_timeslots_signal, delete_shop_timeslots_signal, payment_success_signal
 
 
 @extend_schema(
@@ -291,8 +291,6 @@ class DeliveryTimeslotListAPIView(generics.ListAPIView):
 
 @extend_schema(
     tags=['BookTimeslot'],
-    request=BookingRequestSerializer,
-    responses={status.HTTP_201_CREATED: BookingSerializer}
 )
 class BookingAPIView(APIView):
     throttle_classes = [UserRateThrottle]
@@ -300,50 +298,33 @@ class BookingAPIView(APIView):
     serializer_class = BookingSerializer
 
     def post(self, request):
-        request_serializer = BookingRequestSerializer(data=request.data)
-        if request_serializer.is_valid():
-            validated_data = request_serializer.validated_data
-            timeslot_id = validated_data['timeslot_id']
-            booking_type = validated_data['booking_type']
-            address_id = validated_data['address_id']
-            user_id = request.user.id
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-            if BookTimeslot.objects.filter(time_slot=timeslot_id, user=user_id).exists():
-                return Response({'error': 'User has already booked this timeslot'},
+        validated_data = serializer.validated_data
+        timeslot = validated_data['time_slot']
+        booking_type = validated_data['booking_type']
+        user = request.user
+
+        if BookTimeslot.objects.filter(time_slot=timeslot, user=user).exists():
+            return Response({'error': 'User has already booked this timeslot'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if booking_type == BookingType.PICK_UP.value:
+            if timeslot.pickup_available_quota <= 0:
+                return Response({'error': 'No available pickup quota for this timeslot'},
                                 status=status.HTTP_400_BAD_REQUEST)
+            timeslot.pickup_available_quota -= 1
 
-            timeslot = Timeslot.objects.get(id=timeslot_id)
+        elif booking_type == BookingType.DELIVERY.value:
+            if timeslot.delivery_available_quota <= 0:
+                return Response({'error': 'No available delivery quota for this timeslot'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            timeslot.delivery_available_quota -= 1
 
-            if booking_type == BookingType.PICK_UP.value:
-                if timeslot.pickup_available_quota <= 0:
-                    return Response({'error': 'No available pickup quota for this timeslot'},
-                                    status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    timeslot.pickup_available_quota -= 1
+        serializer.save(user=user)
+        timeslot.save()
 
-            elif booking_type == BookingType.DELIVERY.value:
-                if timeslot.delivery_available_quota <= 0:
-                    return Response({'error': 'No available delivery quota for this timeslot'},
-                                    status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    timeslot.delivery_available_quota -= 1
-
-            booking_data = {
-                'time_slot': timeslot_id,
-                'user': user_id,
-                'address': address_id,
-                'booking_type': BookingType(booking_type).value,
-            }
-            response_serializer = BookingSerializer(data=booking_data)
-
-            if response_serializer.is_valid():
-                booking = response_serializer.save()
-                timeslot.save()
-                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-
-            return Response(response_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(
@@ -354,3 +335,47 @@ class BookingListView(ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = BookingSerializer
     queryset = BookTimeslot.objects.all()
+
+
+@extend_schema(
+    tags=['Payment'],
+)
+class PaymentListCreateView(generics.ListCreateAPIView):
+    """AddressDetails model views."""
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Payment.objects.all()
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+
+
+@extend_schema(
+    tags=['Payment'],
+)
+class PaymentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    """AddressDetails model views."""
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Payment.objects.all()
+    lookup_field = 'id'
+
+    def perform_update(self, serializer):
+        payment_before_update = self.get_object()
+        serialized_data_before_update = serializer.to_representation(payment_before_update)
+
+        payment = serializer.save()
+
+        serialized_data_after_update = serializer.data
+
+        if (serialized_data_before_update.get('payment_status') != PaymentStatus.SUCCESS.name
+                and serialized_data_after_update.get('payment_status') == PaymentStatus.SUCCESS.name):
+            payment_success_signal.send(sender=self.__class__, payment_id=payment.id)
+
+
+@extend_schema(
+    tags=['order'],
+)
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()

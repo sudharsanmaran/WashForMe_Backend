@@ -1,5 +1,7 @@
-from datetime import time, timedelta
+from datetime import time
 from enum import Enum
+
+""""ENUMS"""
 
 
 class BookingType(Enum):
@@ -7,6 +9,31 @@ class BookingType(Enum):
     DELIVERY = 'delivery'
 
 
+class PaymentSource(Enum):
+    CARD = 'card'
+    BANK_TRANSACTION = 'bank_transaction'
+    UPI = 'upi'
+
+
+class PaymentStatus(Enum):
+    FAILED = 'failed'
+    PENDING = 'pending'
+    SUCCESS = 'success'
+
+
+class OrderStatus(Enum):
+    PAYMENT_PENDING = 'payment_pending'
+    PLACED = 'placed'
+    PICKED = 'picked'
+    DELIVERED = 'delivered'
+
+
+"""configs"""
+TIMESLOTS_DAYS = 7
+
+"""messages"""
+
+"""default db values"""
 # (name, extra_amount)
 DEFAULT_WASH_CATEGORIES = [
     ('Rinse wash', 0),
@@ -18,7 +45,7 @@ DEFAULT_WASH_CATEGORIES = [
     ('Towel bleach wash', 1),
 ]
 
-
+# (name, url, amount)
 DEFAULT_ITEMS = [
     ('Shirt', 'media/shirt.png', 10),
     ('T-shirt', 'media/football-shirt.png', 10),
@@ -62,7 +89,6 @@ DEFAULT_ITEMS = [
     ('Waist Coat', 'media/summer.png', 20),
 ]
 
-
 DEFAULT_USER = {
     'phone': '+919999999999',
     'password': 'admin',
@@ -75,7 +101,6 @@ DEFAULT_USER = {
     'other_details': {'availability': 'Yes', 'notifications': 'On', 'language': 'English', 'dark_mode': 'No'},
 }
 
-
 DEFAULT_ADDRESS = {
     'address_line_1': '123 Main Street',
     'address_line_2': '',
@@ -86,11 +111,9 @@ DEFAULT_ADDRESS = {
 }
 
 DEFAULT_SHOP = {
-    'name': 'My Shop',  # Specify the default shop name
-    'opening_time': time(10, 0),  # Specify the opening time
-    'closing_time': time(19, 0),  # Specify the closing time
-    'active': True,  # Specify whether the shop is active
-    'max_user_limit_per_time_slot': 10,  # Specify the maximum user limit per time slot
+    'name': 'My Shop',
+    'opening_time': time(10, 0),
+    'closing_time': time(19, 0),
+    'active': True,
+    'max_user_limit_per_time_slot': 10,
 }
-
-TIMESLOTS_DAYS = 9

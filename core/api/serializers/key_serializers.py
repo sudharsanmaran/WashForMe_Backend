@@ -8,36 +8,36 @@ from rest_framework import (
 from core.constants import BookingType
 from core.models import (
     Item,
-    WashCategory, Cart, Shop, Review, Timeslot, BookTimeslot, Address,
+    WashCategory, Cart, Shop, Review, Timeslot, BookTimeslot, Address, Payment, OrderDetails, Order,
 )
 
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ['id', 'name', 'image', 'price', 'count', 'extras']
+        fields = '__all__'
         read_only_fields = ['id', 'count']
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = WashCategory
-        fields = ['id', 'name', 'extra_per_item']
+        fields = '__all__'
         read_only_fields = ['id']
 
 
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
-        fields = ['id', 'item', 'quantity', 'wash_category', 'price']
+        fields = '__all__'
         read_only_fields = ['id', 'user', 'price']
 
 
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        exclude = ['created_at', 'updated_at', 'user']
-        read_only_fields = ['id']
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'user']
 
 
 class ShopReviewSerializer(serializers.ModelSerializer):
@@ -47,51 +47,39 @@ class ShopReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-class TimeslotQuerySerializer(serializers.Serializer):
-    start_datetime = serializers.DateTimeField()
-    end_datetime = serializers.DateTimeField()
-
-
 class TimeslotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Timeslot
         fields = '__all__'
+        read_only_fields = ['id', 'shop', 'start_datetime', 'end_datetime']
 
 
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookTimeslot
-        fields = ['id', 'time_slot', 'user', 'booking_type', 'address']
-        read_only_fields = ['id']
+        fields = '__all__'
+        read_only_fields = ['id', 'user']
 
 
-class BookingRequestSerializer(serializers.Serializer):
-    timeslot_id = serializers.IntegerField(required=True)
-    address_id = serializers.UUIDField(required=True)
-    booking_type = serializers.ChoiceField(
-        choices=[(BookingType.PICK_UP.value, 'pick_up'), (BookingType.DELIVERY.value, 'delivery')], required=True)
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
 
-    def validate(self, attrs):
-        timeslot_id = attrs.get('timeslot_id')
-        booking_type = attrs.get('booking_type')
-        address_id = attrs.get('address_id')
 
-        # Validate booking_type against BookingType enum
-        try:
-            booking_type = BookingType(booking_type)
-        except ValueError:
-            raise serializers.ValidationError("Invalid booking_type.")
+class OrderDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderDetails
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'product_price',
+                            'wash_category_price', 'subtotal_price']
 
-        # Validate timeslot_id against existing Timeslot objects
-        try:
-            timeslot = Timeslot.objects.get(id=timeslot_id)
-        except Timeslot.DoesNotExist:
-            raise serializers.ValidationError("Invalid timeslot_id.")
 
-        # Validate address_id against existing Address objects
-        try:
-            address = Address.objects.get(id=address_id)
-        except Address.DoesNotExist:
-            raise serializers.ValidationError("Invalid address_id.")
+class OrderSerializer(serializers.ModelSerializer):
+    order_details = OrderDetailsSerializer(many=True)
 
-        return attrs
+    class Meta:
+        model = Order
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'total_price', 'user']

@@ -5,6 +5,7 @@ from core.api.views.key_views import (
     ItemView,
     CategoryView, CartListCreateView, CartListRetrieveUpdateDestroyView, ShopDetailsView,
     UpdateTimeslots, PickupTimeslotListAPIView, DeliveryTimeslotListAPIView, BookingAPIView, BookingListView,
+    PaymentListCreateView, PaymentRetrieveUpdateView, OrderViewSet,
 )
 from core.api.views.login_views import (
     SendOTPView,
@@ -21,6 +22,7 @@ router.register('items', ItemView)
 router.register('categories', CategoryView)
 router.register('address', AddressDetailsView)
 router.register('shop', ShopDetailsView)
+# router.register('order', OrderViewSet)
 # router.register('shop_review', ShopReviewView)
 app_name = 'core'
 
@@ -38,4 +40,6 @@ urlpatterns = [
     path('delivery-timeslots/', DeliveryTimeslotListAPIView.as_view(), name='delivery-timeslot-list'),
     path('book-timeslot/', BookingAPIView.as_view(), name='book-timeslot'),
     path('bookings/', BookingListView.as_view(), name='bookings'),
+    path('payment/', PaymentListCreateView.as_view(), name='payment'),
+    path('payment/<uuid:id>', PaymentRetrieveUpdateView.as_view(), name='payment'),
 ]

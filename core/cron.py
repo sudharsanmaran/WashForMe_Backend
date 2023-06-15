@@ -9,12 +9,12 @@ from core.models import Shop, Timeslot
 
 
 def generate_timeslots(opening_time: time, closing_time: time, timeslot_duration: timedelta,
-                       start_date: date) -> List[Tuple[datetime, datetime]]:
+                       start_date: date, wash_duration: timedelta) -> List[Tuple[datetime, datetime]]:
     timeslots = []
     current_date = start_date
     current_datetime = datetime.combine(current_date, opening_time)
 
-    for _ in range(TIMESLOTS_DAYS):
+    for _ in range(TIMESLOTS_DAYS + wash_duration.days + 1):
         while current_datetime.time() < closing_time:
             end_datetime = current_datetime + timeslot_duration
 
@@ -49,7 +49,7 @@ def update_timeslots(shop_id: int = None):
         shops = Shop.objects.all()
     for shop in shops:
         timeslots = generate_timeslots(shop.opening_time, shop.closing_time, shop.time_slot_duration,
-                                       datetime.now().date())
+                                       datetime.now().date(), shop.wash_duration)
         # generate unique id based on start datetime to ignore conflicts
         timeslots_objects = [Timeslot(
             id=generate_unique_id(int(time.mktime(timeslot[0].timetuple())), shop.id),
