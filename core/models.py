@@ -176,7 +176,7 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     pickup_booking = models.ForeignKey(BookTimeslot, on_delete=models.CASCADE, related_name='pickup_orders')
     delivery_booking = models.ForeignKey(BookTimeslot, on_delete=models.CASCADE, related_name='delivery_orders')
-    total_price = PositiveDecimalField(max_digits=10, decimal_places=2)
+    total_price = PositiveDecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     order_status = models.CharField(max_length=20,
                                     choices=[(tag.name, tag.value) for tag in OrderStatus])
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
@@ -186,7 +186,7 @@ class Order(models.Model):
 
 class OrderDetails(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_details')
     product = models.ForeignKey(Item, on_delete=models.CASCADE)
     wash_category = models.ForeignKey(WashCategory, on_delete=models.CASCADE)
     product_price = models.DecimalField(max_digits=10, decimal_places=2)

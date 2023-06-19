@@ -5,8 +5,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import (
     permissions,
     generics,
-    status, viewsets,
-)
+    status, )
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -16,13 +15,11 @@ from rest_framework.views import APIView
 from core.api.serializers.key_serializers import (
     ItemSerializer,
     CategorySerializer, CartSerializer, ShopSerializer, TimeslotSerializer, BookingSerializer,
-    PaymentSerializer, OrderSerializer,
-)
+    PaymentSerializer, OrderSerializer, )
 from core.custom_view_sets import BaseAttrViewSet
 from core.models import (
     Item,
-    WashCategory, Cart, Shop, Timeslot, BookTimeslot, Payment, Order,
-)
+    WashCategory, Cart, Shop, Timeslot, BookTimeslot, Payment, Order, )
 from .user_views import UserDetailView
 from ...constants import TIMESLOTS_DAYS, BookingType, PaymentStatus
 from ...cron import update_timeslots
@@ -235,8 +232,10 @@ class PickupTimeslotListAPIView(generics.ListAPIView):
 
         queryset = Timeslot.objects.all()
 
-        if start_date and start_datetime:
-            queryset = queryset.filter(start_datetime__gte=start_datetime)
+        if not start_date:
+            start_datetime = datetime.utcnow()
+        queryset = queryset.filter(start_datetime__gte=start_datetime)
+
         if end_date and end_datetime:
             queryset = queryset.filter(end_datetime__lte=end_datetime)
         if shop_id:
@@ -342,6 +341,7 @@ class BookingListView(ListAPIView):
 )
 class PaymentListCreateView(generics.ListCreateAPIView):
     """AddressDetails model views."""
+    throttle_classes = [UserRateThrottle]
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Payment.objects.all()
@@ -355,6 +355,7 @@ class PaymentListCreateView(generics.ListCreateAPIView):
 )
 class PaymentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     """AddressDetails model views."""
+    throttle_classes = [UserRateThrottle]
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Payment.objects.all()
@@ -374,8 +375,20 @@ class PaymentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
 
 
 @extend_schema(
-    tags=['order'],
+    tags=['Orders'],
 )
-class OrderViewSet(viewsets.ModelViewSet):
-    serializer_class = OrderSerializer
+class OrderListCreateAPIView(generics.ListCreateAPIView):
+    throttle_classes = [UserRateThrottle]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+
+@extend_schema(
+    tags=['Orders'],
+)
+class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    throttle_classes = [UserRateThrottle]
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
