@@ -5,7 +5,7 @@ from enum import Enum
 
 
 class BookingType(Enum):
-    PICK_UP = 'pickup'
+    PICKUP = 'pickup'
     DELIVERY = 'delivery'
 
 
@@ -22,7 +22,6 @@ class PaymentStatus(Enum):
 
 
 class OrderStatus(Enum):
-    PAYMENT_PENDING = 'payment_pending'
     PLACED = 'placed'
     PICKED = 'picked'
     DELIVERED = 'delivered'
