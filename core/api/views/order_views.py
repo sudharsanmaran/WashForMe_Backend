@@ -58,7 +58,6 @@ class CartToOrderAPIView(APIView):
             order_details.append(order_detail_data)
 
         order_data = {
-            'order_status': OrderStatus.INITIATED.name,
             'pickup_booking': serializer.validated_data['pickup_booking'].id,
             'delivery_booking': serializer.validated_data['delivery_booking'].id,
             'order_details': order_details

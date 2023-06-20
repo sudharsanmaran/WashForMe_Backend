@@ -9,6 +9,12 @@ class BookingType(Enum):
     DELIVERY = 'delivery'
 
 
+class AddressType(Enum):
+    PICKUP = 'pickup'
+    DELIVERY = 'delivery'
+    PICKUP_AND_DELIVERY = 'pickup_and_delivery'
+
+
 class PaymentSource(Enum):
     CARD = 'card'
     BANK_TRANSACTION = 'bank_transaction'
@@ -107,7 +113,8 @@ DEFAULT_ADDRESS = {
     'city': 'Chennai',
     'country': 'India',
     'pincode': 123456,
-    'type': 'Home',
+    'type': AddressType.PICKUP_AND_DELIVERY.name,
+    'is_primary': True
 }
 
 DEFAULT_SHOP = {

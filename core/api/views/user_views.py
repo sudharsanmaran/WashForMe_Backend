@@ -48,11 +48,9 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
             if not response['send']:
                 return Response({'message': response['message']}, status=status.HTTP_400_BAD_REQUEST)
 
-            super().update(request, *args, **kwargs)
             user = self.get_object()
             user.is_phone_verified = False
             user.save()
-            return
         return super().update(request, *args, **kwargs)
 
 

@@ -11,7 +11,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from WashForMe_Backend import settings
-from core.constants import PaymentSource, PaymentStatus, OrderStatus, BookingType
+from core.constants import PaymentSource, PaymentStatus, OrderStatus, BookingType, AddressType
 from core.custom_model_fields import PositiveDecimalField, CustomPositiveInteger
 
 
@@ -97,15 +97,21 @@ class Address(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        related_name='address'
     )
     address_line_1 = models.CharField(max_length=255)
     address_line_2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=255)
     country = models.CharField(max_length=255)
     pincode = models.IntegerField(default=000000)
-    type = models.CharField(max_length=255)
+    type = models.CharField(max_length=20,
+                            choices=[(tag.name, tag.value) for tag in AddressType])
+    is_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [('type', 'is_primary')]
 
 
 class Cart(models.Model):

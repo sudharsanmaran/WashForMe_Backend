@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from core.constants import OrderStatus
 from core.models import OrderDetails, Order
 
 
@@ -17,7 +18,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at', 'total_price', 'user', 'payment']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'total_price', 'user', 'order_status']
 
     @staticmethod
     def create_order_details(order, order_details_data):
@@ -40,7 +41,7 @@ class OrderSerializer(serializers.ModelSerializer):
         order_details_data = validated_data.pop('order_details')
         user = self.context['request'].user
 
-        order = Order.objects.create(user=user, **validated_data)
+        order = Order.objects.create(user=user, order_status=OrderStatus.INITIATED.name, **validated_data)
 
         total_price = OrderSerializer.create_order_details(order, order_details_data)
 
@@ -53,10 +54,8 @@ class OrderSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
 
         instance.user = user
-        instance.order_status = validated_data.get('order_status', instance.order_status)
         instance.pickup_booking = validated_data.get('pickup_booking', instance.pickup_booking)
         instance.delivery_booking = validated_data.get('delivery_booking', instance.delivery_booking)
-        instance.payment = validated_data.get('payment', instance.payment)
         instance.save()
 
         if order_details_data:
