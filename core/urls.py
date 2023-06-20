@@ -1,18 +1,20 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from core.api.views.key_views import (
-    ItemView, CategoryView, CartListCreateView,
-    CartListRetrieveUpdateDestroyView, ShopDetailsView,
-    UpdateTimeslots, PickupTimeslotListAPIView, DeliveryTimeslotListAPIView,
-    BookingAPIView, BookingListView, PaymentListCreateView, PaymentRetrieveUpdateView,
-    OrderListCreateAPIView, OrderRetrieveUpdateDestroyAPIView, CartToOrderAPIView,
+from core.api.views.cart_views import CartListCreateView, CartListRetrieveUpdateDestroyView
+from core.api.views.core_views import (
+    ItemView, CategoryView
 )
 from core.api.views.login_views import (
     SendOTPView,
     OTPLoginView,
     DecoratedTokenRefreshView, VerifyOtpView,
 )
+from core.api.views.order_views import OrderListCreateAPIView, OrderRetrieveUpdateDestroyAPIView, CartToOrderAPIView
+from core.api.views.payment_views import PaymentListCreateView, PaymentRetrieveUpdateView
+from core.api.views.shop_views import ShopDetailsView
+from core.api.views.timeslot_views import UpdateTimeslots, PickupTimeslotListAPIView, DeliveryTimeslotListAPIView, \
+    BookingAPIView, BookingListView
 from core.api.views.user_views import (
     UserDetailView,
     AddressDetailsView,
@@ -45,5 +47,5 @@ urlpatterns = [
     path('payment/<uuid:id>', PaymentRetrieveUpdateView.as_view(), name='payment-retrieve-update-destroy'),
     path('orders/', OrderListCreateAPIView.as_view(), name='order-list-create'),
     path('orders/<uuid:pk>/', OrderRetrieveUpdateDestroyAPIView.as_view(), name='order-retrieve-update-destroy'),
-    path('cart_to_order/', CartToOrderAPIView.as_view(), name='order-retrieve-update-destroy'),
+    path('cart_to_order/', CartToOrderAPIView.as_view(), name='cart_to_order'),
 ]
