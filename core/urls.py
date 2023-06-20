@@ -45,5 +45,5 @@ urlpatterns = [
     path('payment/<uuid:id>', PaymentRetrieveUpdateView.as_view(), name='payment-retrieve-update-destroy'),
     path('orders/', OrderListCreateAPIView.as_view(), name='order-list-create'),
     path('orders/<uuid:pk>/', OrderRetrieveUpdateDestroyAPIView.as_view(), name='order-retrieve-update-destroy'),
-    path('cart_to_order', CartToOrderAPIView.as_view(), name='order-retrieve-update-destroy'),
+    path('cart_to_order/', CartToOrderAPIView.as_view(), name='order-retrieve-update-destroy'),
 ]
