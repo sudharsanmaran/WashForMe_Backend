@@ -64,7 +64,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = '__all__'
-        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'amount']
 
 
 class OrderDetailsSerializer(serializers.ModelSerializer):
@@ -130,3 +130,9 @@ class OrderSerializer(serializers.ModelSerializer):
             instance.save()
 
         return instance
+
+
+class CartToOrderRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['pickup_booking', 'delivery_booking']

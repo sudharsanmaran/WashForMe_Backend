@@ -22,6 +22,7 @@ class PaymentStatus(Enum):
 
 
 class OrderStatus(Enum):
+    INITIATED = 'initiated'
     PLACED = 'placed'
     PICKED = 'picked'
     DELIVERED = 'delivered'

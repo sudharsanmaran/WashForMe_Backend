@@ -9,7 +9,6 @@ from django.contrib.auth.models import (
 )
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from rest_framework import serializers
 
 from WashForMe_Backend import settings
 from core.constants import PaymentSource, PaymentStatus, OrderStatus, BookingType
@@ -159,18 +158,6 @@ class BookTimeslot(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Payment(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    amount = PositiveDecimalField(max_digits=10, decimal_places=2)
-    payment_source = models.CharField(max_length=20,
-                                      choices=[(tag.name, tag.value) for tag in PaymentSource])
-    payment_status = models.CharField(max_length=20,
-                                      choices=[(tag.name, tag.value) for tag in PaymentStatus])
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -179,7 +166,6 @@ class Order(models.Model):
     total_price = PositiveDecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     order_status = models.CharField(max_length=20,
                                     choices=[(tag.name, tag.value) for tag in OrderStatus])
-    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -193,6 +179,19 @@ class OrderDetails(models.Model):
     wash_category_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
     subtotal_price = PositiveDecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Payment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    amount = PositiveDecimalField(max_digits=10, decimal_places=2)
+    payment_source = models.CharField(max_length=20,
+                                      choices=[(tag.name, tag.value) for tag in PaymentSource])
+    payment_status = models.CharField(max_length=20,
+                                      choices=[(tag.name, tag.value) for tag in PaymentStatus])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

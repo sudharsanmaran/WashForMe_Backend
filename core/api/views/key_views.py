@@ -15,13 +15,13 @@ from rest_framework.views import APIView
 from core.api.serializers.key_serializers import (
     ItemSerializer,
     CategorySerializer, CartSerializer, ShopSerializer, TimeslotSerializer, BookingSerializer,
-    PaymentSerializer, OrderSerializer, )
+    PaymentSerializer, OrderSerializer, OrderDetailsSerializer, CartToOrderRequestSerializer, )
 from core.custom_view_sets import BaseAttrViewSet
 from core.models import (
     Item,
     WashCategory, Cart, Shop, Timeslot, BookTimeslot, Payment, Order, )
 from .user_views import UserDetailView
-from ...constants import TIMESLOTS_DAYS, BookingType, PaymentStatus
+from ...constants import TIMESLOTS_DAYS, BookingType, PaymentStatus, OrderStatus
 from ...cron import update_timeslots
 from ...signals import create_shop_timeslots_signal, delete_shop_timeslots_signal, payment_success_signal
 
@@ -308,7 +308,7 @@ class BookingAPIView(APIView):
         if BookTimeslot.objects.filter(time_slot=timeslot, user=user).exists():
             return Response({'error': 'User has already booked this timeslot'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if booking_type == BookingType.PICK_UP.value:
+        if booking_type == BookingType.PICKUP.value:
             if timeslot.pickup_available_quota <= 0:
                 return Response({'error': 'No available pickup quota for this timeslot'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -340,7 +340,6 @@ class BookingListView(ListAPIView):
     tags=['Payment'],
 )
 class PaymentListCreateView(generics.ListCreateAPIView):
-    """AddressDetails model views."""
     throttle_classes = [UserRateThrottle]
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -354,7 +353,6 @@ class PaymentListCreateView(generics.ListCreateAPIView):
     tags=['Payment'],
 )
 class PaymentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
-    """AddressDetails model views."""
     throttle_classes = [UserRateThrottle]
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -392,3 +390,50 @@ class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+
+@extend_schema(
+    tags=['Orders'],
+)
+class CartToOrderAPIView(APIView):
+    throttle_classes = [UserRateThrottle]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CartToOrderRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        cart_items = Cart.objects.filter(user=user)
+
+        if not cart_items:
+            return Response({'detail': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_details = []
+        for cart_item in cart_items:
+            order_detail_data = {
+                'product': cart_item.item.id,
+                'wash_category': cart_item.wash_category.id,
+                'quantity': cart_item.quantity,
+            }
+            order_detail_serializer = OrderDetailsSerializer(data=order_detail_data)
+            order_detail_serializer.is_valid(raise_exception=True)
+            order_details.append(order_detail_data)
+
+        order_data = {
+            'order_status': OrderStatus.INITIATED.name,
+            'pickup_booking': serializer.validated_data['pickup_booking'].id,
+            'delivery_booking': serializer.validated_data['delivery_booking'].id,
+            'order_details': order_details
+        }
+
+        order_serializer = OrderSerializer(data=order_data, context={'request': request})
+        order_serializer.is_valid(raise_exception=True)
+        order_serializer.save()
+
+        cart_items.delete()
+        user.cart_total_price = 0
+        user.save()
+
+        return Response(order_serializer.data, status=status.HTTP_201_CREATED)
+
