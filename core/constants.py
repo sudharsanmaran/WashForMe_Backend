@@ -16,12 +16,12 @@ class AddressType(Enum):
 
 
 class PaymentSource(Enum):
-    CARD = 'card'
-    BANK_TRANSACTION = 'bank_transaction'
-    UPI = 'upi'
+    RAZORPAY = 'razorpay'
+    OTHERS = 'others'
 
 
 class PaymentStatus(Enum):
+    INITIATED = 'initiated'
     FAILED = 'failed'
     PENDING = 'pending'
     SUCCESS = 'success'
@@ -36,6 +36,7 @@ class OrderStatus(Enum):
 
 """configs"""
 TIMESLOTS_DAYS = 7
+INR_UNIT = 100
 
 """messages"""
 

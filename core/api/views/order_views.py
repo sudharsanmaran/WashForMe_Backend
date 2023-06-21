@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
-from core.api.serializers.order_serializers import OrderSerializer, CartToOrderRequestSerializer, OrderDetailsSerializer
-from core.constants import OrderStatus
+from core.api.serializers.order_serializers import (OrderSerializer,
+                                                    CartToOrderRequestSerializer,
+                                                    OrderDetailsSerializer)
 from core.models import Order, Cart
 
 
@@ -22,7 +23,7 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
 @extend_schema(
     tags=['Orders'],
 )
-class OrderRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+class OrderRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
     queryset = Order.objects.all()

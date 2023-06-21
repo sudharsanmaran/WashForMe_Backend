@@ -192,12 +192,22 @@ class OrderDetails(models.Model):
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
     amount = PositiveDecimalField(max_digits=10, decimal_places=2)
     payment_source = models.CharField(max_length=20,
                                       choices=[(tag.name, tag.value) for tag in PaymentSource])
     payment_status = models.CharField(max_length=20,
                                       choices=[(tag.name, tag.value) for tag in PaymentStatus])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RazorpayPayment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_order_id = models.CharField(max_length=100)
+    razorpay_signature = models.CharField(max_length=100, blank=True, null=True)
+    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

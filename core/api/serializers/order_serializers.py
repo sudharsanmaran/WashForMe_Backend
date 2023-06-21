@@ -50,6 +50,9 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
     def update(self, instance, validated_data):
+        if instance.order_status != OrderStatus.INITIATED.name:
+            raise serializers.ValidationError("Cannot edit a placed order.")
+
         order_details_data = validated_data.pop('order_details') if 'order_details' in validated_data else None
         user = self.context['request'].user
 

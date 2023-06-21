@@ -106,8 +106,6 @@ class OTPLoginView(APIView):
                 response_data = {
                     'refresh': str(token),
                     'access': str(token.access_token),
-
-                    'user': user_serializer.UserSerializer(user).data
                 }
 
                 cache.delete(phone_number)
