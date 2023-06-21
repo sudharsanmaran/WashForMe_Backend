@@ -9,9 +9,11 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
-from core.api.serializers.payment_serializers import RazorpayPaymentRequestSerializer, RazorpayOrderResponseSerializer, \
-    PaymentSerializer, RazorpayInitiateSerializer, RazorpayPaymentInitiateResponseSerializer, \
+from core.api.serializers.payment_serializers import (
+    RazorpayPaymentRequestSerializer, RazorpayOrderResponseSerializer,
+    PaymentSerializer, RazorpayInitiateSerializer, RazorpayPaymentInitiateResponseSerializer,
     RazorpayPartialPaymentSerializer
+)
 from core.constants import INR_UNIT, PaymentSource, PaymentStatus
 from core.models import Payment, Order, RazorpayPayment
 
@@ -87,12 +89,12 @@ class RazorpayPaymentInfoView(APIView):
                 'wash_for_me_order_id': str(order_obj.id),
                 'wash_for_me_payment_id': str(payment_id)
             },
-            "partial_payment": True
+            "partial_payment": False
         }
         razorpay_order = client.order.create(data=razorpay_order_data)
         razorpay_order_serializer = RazorpayOrderResponseSerializer(data=razorpay_order)
         if not razorpay_order_serializer.is_valid():
-            logger.warning('razorpay create order_obj api response changed')
+            logger.warning('razorpay create order api response changed')
         return razorpay_order
 
     @staticmethod
