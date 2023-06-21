@@ -147,5 +147,24 @@ class RazorpayStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        #  todo verify signature
-        pass
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        razorpay_order_id = validated_data['razorpay_order_id']
+        razorpay_payment_id = validated_data['razorpay_payment_id']
+        razorpay_signature = validated_data['razorpay_signature']
+
+        client = RazorpayPaymentInfoView.get_client()
+
+        verified = client.utility.verify_payment_signature({
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        })
+        if not verified:
+            return Response({'error': 'can\'t verify given razorpay signature'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # todo update RazorpayPayment obj and order status
+
+        return Response
