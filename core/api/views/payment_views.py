@@ -165,6 +165,6 @@ class RazorpayStatusView(APIView):
             return Response({'error': 'can\'t verify given razorpay signature'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # todo update RazorpayPayment obj and order status
+        # todo update RazorpayPayment obj , order and payment status
 
         return Response

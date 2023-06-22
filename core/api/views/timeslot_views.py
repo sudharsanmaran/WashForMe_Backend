@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -8,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
-from core.api.serializers.timeslot_serializers import TimeslotSerializer, BookingSerializer
+from core.api.serializers.timeslot_serializers import BookingSerializer, GroupedTimeslotListSerializer
 from core.constants import TIMESLOTS_DAYS, BookingType
 from core.cron import update_timeslots
 from core.models import Timeslot, Shop, BookTimeslot
@@ -32,13 +33,24 @@ class UpdateTimeslots(APIView):
         OpenApiParameter(name='is_available', type=bool),
     ]
 )
-class PickupTimeslotListAPIView(generics.ListAPIView):
+class PickupTimeslotListAPIView(APIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = TimeslotSerializer
+    serializer_class = GroupedTimeslotListSerializer
 
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        timeslots = self.get_queryset()
+
+        grouped_timeslots = {}
+        for date, group in itertools.groupby(timeslots, key=lambda t: t.start_datetime.date()):
+            grouped_timeslots[date] = list(group)
+
+        grouped_timeslot_list = [{'date': date, 'timeslots': timeslots} for date, timeslots in
+                                 grouped_timeslots.items()]
+
+        serializer = GroupedTimeslotListSerializer(grouped_timeslot_list)
+
+        return Response(serializer.data)
 
     def get_queryset(self):
         start_date = self.request.query_params.get('start_date')
@@ -77,13 +89,24 @@ class PickupTimeslotListAPIView(generics.ListAPIView):
         OpenApiParameter(name='is_available', type=bool),
     ]
 )
-class DeliveryTimeslotListAPIView(generics.ListAPIView):
+class DeliveryTimeslotListAPIView(APIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = TimeslotSerializer
+    serializer_class = GroupedTimeslotListSerializer
 
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        timeslots = self.get_queryset()
+
+        grouped_timeslots = {}
+        for date, group in itertools.groupby(timeslots, key=lambda t: t.start_datetime.date()):
+            grouped_timeslots[date] = list(group)
+
+        grouped_timeslot_list = [{'date': date, 'timeslots': timeslots} for date, timeslots in
+                                 grouped_timeslots.items()]
+
+        serializer = GroupedTimeslotListSerializer(grouped_timeslot_list)
+
+        return Response(serializer.data)
 
     def get_queryset(self):
         pickup_datetime = self.request.query_params.get('pickup_datetime')
@@ -92,14 +115,14 @@ class DeliveryTimeslotListAPIView(generics.ListAPIView):
         is_available = bool(self.request.query_params.get('is_available') == 'true')
         try:
             if pickup_datetime:
-                pickup_datetime = datetime.strptime(pickup_datetime, '%Y-%m-%d %H:%M:%S')
+                pickup_datetime = datetime.strptime(pickup_datetime, '%Y-%m-%dT%H:%M:%S%z')
         except ValueError:
-            raise ValidationError('datetime must be in format like this example, \'YYYY-mm-dd HH:MM:SS\'')
+            raise ValidationError('datetime must be in format like this example, \'YYYY-mm-ddTHH:MM:SS+00:00\'')
 
         queryset = Timeslot.objects.all()
 
         if not pickup_datetime:
-            raise ValidationError('datetime must be in format like this example, \'YYYY-mm-dd HH:MM:SS\'')
+            raise ValidationError('datetime must be in format like this example, \'YYYY-mm-ddTHH:MM:SS+00:00\'')
         if not shop:
             raise ValidationError('wrong shop_id')
 

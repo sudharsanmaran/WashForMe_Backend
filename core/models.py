@@ -128,10 +128,9 @@ class Cart(models.Model):
 class Shop(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    opening_time = models.TimeField(validators=[MinValueValidator(time(6, 0)),
-                                                MaxValueValidator(time(21, 0))])
-    closing_time = models.TimeField(validators=[MinValueValidator(time(7, 0)),
-                                                MaxValueValidator(time(22, 0))])
+    opening_time = models.TimeField()
+    closing_time = models.TimeField()
+    time_zone_offset = models.IntegerField(default=330)  # +5:30 offset from UTC
     wash_duration = models.DurationField(default=timedelta(days=2),
                                          validators=[MinValueValidator(timedelta(days=1))])
     time_slot_duration = models.DurationField(default=timedelta(hours=3),
