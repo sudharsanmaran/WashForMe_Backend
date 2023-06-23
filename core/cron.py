@@ -16,7 +16,7 @@ def generate_timeslots(opening_time: time, closing_time: time, timeslot_duration
     current_datetime = datetime.combine(current_date, opening_time)
     current_datetime -= timedelta(minutes=time_zone_offset)
 
-    for _ in range(TIMESLOTS_DAYS + wash_duration.days + 1):
+    for _ in range(TIMESLOTS_DAYS * 2 + 1):
         while current_datetime.time() < closing_time:
             end_datetime = current_datetime + timeslot_duration
 

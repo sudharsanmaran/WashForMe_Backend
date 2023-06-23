@@ -1,6 +1,9 @@
 import itertools
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from django.db.models import Q
+from django_filters import filters
+from django_filters.rest_framework import FilterSet, DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status, permissions
 from rest_framework.generics import ListAPIView
@@ -28,8 +31,8 @@ class UpdateTimeslots(APIView):
 @extend_schema(
     tags=['Timeslots'],
     parameters=[
-        OpenApiParameter(name='start_date', type=str),
-        OpenApiParameter(name='end_date', type=str),
+        # OpenApiParameter(name='start_date', type=str),
+        # OpenApiParameter(name='end_date', type=str),
         OpenApiParameter(name='shop_id', required=True, type=str),
         OpenApiParameter(name='is_available', type=bool),
     ]
@@ -57,28 +60,31 @@ class PickupTimeslotListAPIView(APIView):
         return Response(serializer.data)
 
     def get_queryset(self):
-        start_date = self.request.query_params.get('start_date')
-        end_date = self.request.query_params.get('end_date')
+        # start_date = self.request.query_params.get('start_date')
+        # end_date = self.request.query_params.get('end_date')
         shop_id = self.request.query_params.get('shop_id')
         is_available = bool(self.request.query_params.get('is_available') == 'true')
 
-        if start_date:
-            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-        if end_date:
-            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-
         queryset = Timeslot.objects.all()
-
-        if not start_date:
-            start_datetime = datetime.utcnow()
+        # if start_date:
+        #     start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+        # else:
+        start_datetime = datetime.utcnow()
         queryset = queryset.filter(start_datetime__gte=start_datetime)
 
-        if end_date and end_datetime:
-            queryset = queryset.filter(end_datetime__lte=end_datetime)
+        # if end_date:
+        #     end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
+        # else:
+        end_datetime = datetime.utcnow() + timedelta(days=TIMESLOTS_DAYS)
+        queryset = queryset.filter(end_datetime__lte=end_datetime)
+
         if shop_id:
             queryset = queryset.filter(shop_id=shop_id)
+
         if is_available:
             queryset = queryset.filter(pickup_available_quota__gte=1)
+
+        return queryset
 
         return queryset
 
@@ -120,9 +126,14 @@ class DeliveryTimeslotListAPIView(APIView):
 
         queryset = Timeslot.objects.all()
 
-        queryset = queryset.filter(
-            start_datetime__gte=pickup_datetime + shop.wash_duration
-        ).filter(shop_id=shop.id)
+        start_datetime_filter = Q(start_datetime__gte=pickup_datetime + shop.wash_duration)
+        shop_filter = Q(shop_id=shop.id)
+        end_datetime_filter = Q(start_datetime__lte=pickup_datetime +
+                                                    shop.wash_duration +
+                                                    timedelta(days=TIMESLOTS_DAYS)
+                                )
+
+        queryset = queryset.filter(start_datetime_filter & shop_filter & end_datetime_filter)
 
         if is_available:
             queryset = queryset.filter(delivery_available_quota__gte=1)
@@ -168,6 +179,30 @@ class BookingAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class BookTimeslotFilter(FilterSet):
+    updated_at__gte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='gte')
+    updated_at__lte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='lte')
+    booking_type = filters.ChoiceFilter(
+        choices=[(tag.name, tag.value) for tag in BookingType],
+        field_name='booking_type',
+        lookup_expr='exact'
+    )
+
+    class Meta:
+        model = BookTimeslot
+        fields = ['updated_at__gte', 'updated_at__lte', 'booking_type']
+
+    def validate_updated_at__gte(self, value):
+        if value is not None and value > datetime.now():
+            raise filters.ValidationError("updated_at__gte cannot be in the future.")
+        return value
+
+    def validate_updated_at__lte(self, value):
+        if value is not None and value > datetime.now():
+            raise filters.ValidationError("updated_at__lte cannot be in the future.")
+        return value
+
+
 @extend_schema(
     tags=['BookTimeslot'],
 )
@@ -176,3 +211,5 @@ class BookingListView(ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = BookingSerializer
     queryset = BookTimeslot.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = BookTimeslotFilter

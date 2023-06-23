@@ -1,3 +1,7 @@
+import datetime
+
+from django_filters import filters
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -7,7 +11,32 @@ from rest_framework.views import APIView
 from core.api.serializers.order_serializers import (OrderSerializer,
                                                     CartToOrderRequestSerializer,
                                                     OrderDetailsSerializer)
+from core.constants import OrderStatus
 from core.models import Order, Cart
+
+
+class OrderFilter(FilterSet):
+    updated_at__gte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='gte')
+    updated_at__lte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='lte')
+    order_status = filters.ChoiceFilter(
+        choices=[(tag.name, tag.value) for tag in OrderStatus],
+        field_name='booking_type',
+        lookup_expr='exact'
+    )
+
+    class Meta:
+        model = Order
+        fields = ['updated_at__gte', 'updated_at__lte', 'order_status']
+
+    def validate_updated_at__gte(self, value):
+        if value is not None and value > datetime.now():
+            raise filters.ValidationError("updated_at__gte cannot be in the future.")
+        return value
+
+    def validate_updated_at__lte(self, value):
+        if value is not None and value > datetime.now():
+            raise filters.ValidationError("updated_at__lte cannot be in the future.")
+        return value
 
 
 @extend_schema(
@@ -18,6 +47,8 @@ class OrderListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = OrderFilter
 
 
 @extend_schema(
