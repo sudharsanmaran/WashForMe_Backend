@@ -46,6 +46,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt',
     'storages',
     'django_crontab',
+    'django_extensions',
 ]
 
 MY_APPS = [
@@ -151,7 +152,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_THROTTLE_RATES': {
         'anon': '3/second',
-        'user': '1/second'
+        'user': '10/second'
     }
 }
 SPECTACULAR_SETTINGS = {

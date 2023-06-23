@@ -1,0 +1,1440 @@
+digraph model_graph {
+  // Dotfile by Django-Extensions graph_models
+  // Created: 2023-06-23 05:45
+  // Cli Options: -a --dot -o core_models.dot
+
+  fontname = "Roboto"
+  fontsize = 8
+  splines  = true
+  rankdir = "TB"
+
+  node [
+    fontname = "Roboto"
+    fontsize = 8
+    shape = "plaintext"
+  ]
+
+  edge [
+    fontname = "Roboto"
+    fontsize = 8
+  ]
+
+  // Labels
+
+
+  django_contrib_admin_models_LogEntry [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    LogEntry
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>AutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto"><B>content_type</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">action_flag</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveSmallIntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">action_time</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">change_message</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">TextField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">object_id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">TextField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">object_repr</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+
+
+
+  django_contrib_auth_models_Permission [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Permission
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>AutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>content_type</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">codename</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  django_contrib_auth_models_Group [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Group
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>AutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+
+
+
+  django_contrib_contenttypes_models_ContentType [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    ContentType
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>AutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">app_label</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">model</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+
+
+
+  django_contrib_sessions_base_session_AbstractBaseSession [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    AbstractBaseSession
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">expire_date</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">session_data</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">TextField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  django_contrib_sessions_models_Session [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Session<BR/>&lt;<FONT FACE="Roboto"><I>AbstractBaseSession</I></FONT>&gt;
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><I><B>session_key</B></I></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><I><B>CharField</B></I></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><I>expire_date</I></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><I>DateTimeField</I></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><I>session_data</I></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><I>TextField</I></FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+
+
+
+  django_contrib_auth_base_user_AbstractBaseUser [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    AbstractBaseUser
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">last_login</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  django_contrib_auth_models_PermissionsMixin [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    PermissionsMixin
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">is_superuser</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_User [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    User<BR/>&lt;<FONT FACE="Roboto"><I>AbstractBaseUser,PermissionsMixin</I></FONT>&gt;
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">cart_total_price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">email</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">EmailField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">first_name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">is_active</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">is_phone_verified</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">is_staff</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><I>is_superuser</I></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><I>BooleanField</I></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto"><I>last_login</I></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto"><I>DateTimeField</I></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">last_name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">other_details</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">TextField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><I>password</I></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><I>CharField</I></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">phone</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Item [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Item
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">count</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">IntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">extras</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">JSONField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">image</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">FileField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_WashCategory [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    WashCategory
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">extra_per_item</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Address [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Address
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">address_line_1</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">address_line_2</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">city</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">country</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">is_primary</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">pincode</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">IntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">type</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Cart [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Cart
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>item</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>wash_category</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">quantity</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CustomPositiveInteger</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Shop [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Shop
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>BigAutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">active</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">closing_time</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">TimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">max_user_limit_per_time_slot</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CustomPositiveInteger</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">opening_time</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">TimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">time_slot_duration</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DurationField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">time_zone_offset</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">IntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">wash_duration</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DurationField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Timeslot [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Timeslot
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>BigAutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>shop</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">delivery_available_quota</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveIntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">end_datetime</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">pickup_available_quota</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveIntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">start_datetime</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_BookTimeslot [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    BookTimeslot
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>address</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>time_slot</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">booking_type</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Order [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Order
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>delivery_booking</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>pickup_booking</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">order_status</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">total_price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_OrderDetails [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    OrderDetails
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>order</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>product</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>wash_category</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">product_price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">quantity</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveIntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">subtotal_price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">wash_category_price</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DecimalField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Payment [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Payment
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>order</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>OneToOneField (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">amount</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveDecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">payment_source</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">payment_status</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_RazorpayPayment [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    RazorpayPayment
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>payment</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>OneToOneField (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">razorpay_order_id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">razorpay_payment_id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">razorpay_signature</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">CharField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+  core_models_Review [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    Review
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>id</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>UUIDField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>shop</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>user</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">comment</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">TextField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">created_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">rating</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">PositiveIntegerField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">updated_at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
+
+
+
+  // Relations
+
+  django_contrib_admin_models_LogEntry -> core_models_User
+  [label=" user (logentry)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  django_contrib_admin_models_LogEntry -> django_contrib_contenttypes_models_ContentType
+  [label=" content_type (logentry)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+
+  django_contrib_auth_models_Permission -> django_contrib_contenttypes_models_ContentType
+  [label=" content_type (permission)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  django_contrib_auth_models_Group -> django_contrib_auth_models_Permission
+  [label=" permissions (group)"] [arrowhead=dot arrowtail=dot, dir=both];
+
+
+
+  django_contrib_sessions_models_Session -> django_contrib_sessions_base_session_AbstractBaseSession
+  [label=" abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+
+  core_models_User -> django_contrib_auth_models_Group
+  [label=" groups (user)"] [arrowhead=dot arrowtail=dot, dir=both];
+
+  core_models_User -> django_contrib_auth_models_Permission
+  [label=" user_permissions (user)"] [arrowhead=dot arrowtail=dot, dir=both];
+
+  core_models_User -> django_contrib_auth_base_user_AbstractBaseUser
+  [label=" abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  core_models_User -> django_contrib_auth_models_PermissionsMixin
+  [label=" abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  core_models_Address -> core_models_User
+  [label=" user (address)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Cart -> core_models_User
+  [label=" user (cart)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Cart -> core_models_Item
+  [label=" item (cart)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Cart -> core_models_WashCategory
+  [label=" wash_category (cart)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Shop -> core_models_User
+  [label=" user (shop)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Timeslot -> core_models_Shop
+  [label=" shop (timeslot)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_BookTimeslot -> core_models_Timeslot
+  [label=" time_slot (booktimeslot)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_BookTimeslot -> core_models_User
+  [label=" user (booktimeslot)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_BookTimeslot -> core_models_Address
+  [label=" address (booktimeslot)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Order -> core_models_User
+  [label=" user (order)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Order -> core_models_BookTimeslot
+  [label=" pickup_booking (pickup_orders)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Order -> core_models_BookTimeslot
+  [label=" delivery_booking (delivery_orders)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_OrderDetails -> core_models_Order
+  [label=" order (order_details)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_OrderDetails -> core_models_Item
+  [label=" product (orderdetails)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_OrderDetails -> core_models_WashCategory
+  [label=" wash_category (orderdetails)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Payment -> core_models_User
+  [label=" user (payment)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Payment -> core_models_Order
+  [label=" order (payment)"] [arrowhead=none, arrowtail=none, dir=both];
+
+  core_models_RazorpayPayment -> core_models_Payment
+  [label=" payment (razorpaypayment)"] [arrowhead=none, arrowtail=none, dir=both];
+
+  core_models_Review -> core_models_Shop
+  [label=" shop (reviews)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  core_models_Review -> core_models_User
+  [label=" user (review)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+
+}
