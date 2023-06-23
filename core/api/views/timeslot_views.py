@@ -2,17 +2,18 @@ import itertools
 from datetime import datetime
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import status, generics, permissions
-from rest_framework.exceptions import ValidationError
+from rest_framework import status, permissions
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
-from core.api.serializers.timeslot_serializers import BookingSerializer, GroupedTimeslotListSerializer
+from core.api.serializers.timeslot_serializers import (
+    BookingSerializer, GroupedTimeslotListSerializer,
+    TimeSlotPickupRequestSerializer, TimeslotDeliveryRequestSerializer)
 from core.constants import TIMESLOTS_DAYS, BookingType
 from core.cron import update_timeslots
-from core.models import Timeslot, Shop, BookTimeslot
+from core.models import Timeslot, BookTimeslot
 
 
 @extend_schema(
@@ -39,6 +40,9 @@ class PickupTimeslotListAPIView(APIView):
     serializer_class = GroupedTimeslotListSerializer
 
     def get(self, request, *args, **kwargs):
+        serializer = TimeSlotPickupRequestSerializer(data=self.request.query_params)
+        serializer.is_valid(raise_exception=True)
+
         timeslots = self.get_queryset()
 
         grouped_timeslots = {}
@@ -57,13 +61,11 @@ class PickupTimeslotListAPIView(APIView):
         end_date = self.request.query_params.get('end_date')
         shop_id = self.request.query_params.get('shop_id')
         is_available = bool(self.request.query_params.get('is_available') == 'true')
-        try:
-            if start_date:
-                start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-            if end_date:
-                end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        except ValueError:
-            raise ValidationError('date must be in date format like \'yyyy-mm-dd\'')
+
+        if start_date:
+            start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+        if end_date:
+            end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
 
         queryset = Timeslot.objects.all()
 
@@ -84,8 +86,7 @@ class PickupTimeslotListAPIView(APIView):
 @extend_schema(
     tags=['Timeslots'],
     parameters=[
-        OpenApiParameter(name='pickup_datetime', required=True, type=str),
-        OpenApiParameter(name='shop_id', required=True, type=str),
+        OpenApiParameter(name='pickup_booking_id', required=True, type=str),
         OpenApiParameter(name='is_available', type=bool),
     ]
 )
@@ -95,7 +96,10 @@ class DeliveryTimeslotListAPIView(APIView):
     serializer_class = GroupedTimeslotListSerializer
 
     def get(self, request, *args, **kwargs):
-        timeslots = self.get_queryset()
+        serializer = TimeslotDeliveryRequestSerializer(data=self.request.query_params, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        timeslots = self.get_queryset(serializer.validated_data['pickup_booking_id'])
 
         grouped_timeslots = {}
         for date, group in itertools.groupby(timeslots, key=lambda t: t.start_datetime.date()):
@@ -108,25 +112,17 @@ class DeliveryTimeslotListAPIView(APIView):
 
         return Response(serializer.data)
 
-    def get_queryset(self):
-        pickup_datetime = self.request.query_params.get('pickup_datetime')
-        shop_id = self.request.query_params.get('shop_id')
-        shop = Shop.objects.filter(pk=shop_id).first()
+    def get_queryset(self, pickup_booking: BookTimeslot):
+        time_slot = pickup_booking.time_slot
+        shop = time_slot.shop
+        pickup_datetime = time_slot.start_datetime
         is_available = bool(self.request.query_params.get('is_available') == 'true')
-        try:
-            if pickup_datetime:
-                pickup_datetime = datetime.strptime(pickup_datetime, '%Y-%m-%dT%H:%M:%S%z')
-        except ValueError:
-            raise ValidationError('datetime must be in format like this example, \'YYYY-mm-ddTHH:MM:SS+00:00\'')
 
         queryset = Timeslot.objects.all()
 
-        if not pickup_datetime:
-            raise ValidationError('datetime must be in format like this example, \'YYYY-mm-ddTHH:MM:SS+00:00\'')
-        if not shop:
-            raise ValidationError('wrong shop_id')
-
-        queryset = queryset.filter(start_datetime__gte=pickup_datetime + shop.wash_duration).filter(shop_id=shop_id)
+        queryset = queryset.filter(
+            start_datetime__gte=pickup_datetime + shop.wash_duration
+        ).filter(shop_id=shop.id)
 
         if is_available:
             queryset = queryset.filter(delivery_available_quota__gte=1)
