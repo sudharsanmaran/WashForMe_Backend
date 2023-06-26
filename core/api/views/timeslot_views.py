@@ -28,29 +28,41 @@ class UpdateTimeslots(APIView):
         return Response(data=f'timeslots for all shop are updated for {TIMESLOTS_DAYS} days', status=status.HTTP_200_OK)
 
 
-@extend_schema(
-    tags=['Timeslots'],
-    parameters=[
-        # OpenApiParameter(name='start_date', type=str),
-        # OpenApiParameter(name='end_date', type=str),
-        OpenApiParameter(name='shop_id', required=True, type=str),
-        OpenApiParameter(name='is_available', type=bool),
-    ]
-)
-class PickupTimeslotListAPIView(APIView):
+class TimeslotListAPIView(APIView):
+    """Timeslots base class"""
     throttle_classes = [UserRateThrottle]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = GroupedTimeslotListSerializer
 
-    def get(self, request, *args, **kwargs):
-        serializer = TimeSlotPickupRequestSerializer(data=self.request.query_params)
-        serializer.is_valid(raise_exception=True)
+    def get_queryset(self, **kwargs):
+        raise NotImplementedError()
 
-        timeslots = self.get_queryset()
-
+    def get_grouped_timeslots(self, timeslots):
         grouped_timeslots = {}
         for date, group in itertools.groupby(timeslots, key=lambda t: t.start_datetime.date()):
             grouped_timeslots[date] = list(group)
+        return grouped_timeslots
+
+    def get_available_timeslots(self, start_datetime, end_datetime, shop_id):
+        booked_timeslots = BookTimeslot.objects.filter(
+            Q(time_slot__start_datetime__range=[start_datetime, end_datetime]) |
+            Q(time_slot__end_datetime__range=[start_datetime, end_datetime]),
+            time_slot__shop_id=shop_id
+        ).values_list('time_slot__id', flat=True)
+
+        available_timeslots = Timeslot.objects.filter(
+            start_datetime__gte=start_datetime,
+            end_datetime__lte=end_datetime,
+            shop_id=shop_id
+        ).exclude(id__in=booked_timeslots)
+
+        return available_timeslots
+
+    def get(self, request, *args, **kwargs):
+
+        timeslots = self.get_queryset()
+
+        grouped_timeslots = self.get_grouped_timeslots(timeslots)
 
         grouped_timeslot_list = [{'date': date, 'timeslots': timeslots} for date, timeslots in
                                  grouped_timeslots.items()]
@@ -59,32 +71,31 @@ class PickupTimeslotListAPIView(APIView):
 
         return Response(serializer.data)
 
-    def get_queryset(self):
-        # start_date = self.request.query_params.get('start_date')
-        # end_date = self.request.query_params.get('end_date')
-        shop_id = self.request.query_params.get('shop_id')
-        is_available = bool(self.request.query_params.get('is_available') == 'true')
 
-        queryset = Timeslot.objects.all()
-        # if start_date:
-        #     start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
-        # else:
+@extend_schema(
+    tags=['Timeslots'],
+    parameters=[
+        OpenApiParameter(name='shop_id', required=True, type=str),
+        OpenApiParameter(name='is_available', type=bool),
+    ]
+)
+class PickupTimeslotListAPIView(TimeslotListAPIView):
+    """pickup timeslots"""
+    serializer_class = GroupedTimeslotListSerializer
+
+    def get_queryset(self, **kwargs):
+        serializer = TimeSlotPickupRequestSerializer(data=self.request.query_params)
+        serializer.is_valid(raise_exception=True)
+        shop = serializer.validated_data['shop_id']
+        is_available = bool(serializer.validated_data['is_available'] == 'true')
+
         start_datetime = datetime.utcnow()
-        queryset = queryset.filter(start_datetime__gte=start_datetime)
-
-        # if end_date:
-        #     end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
-        # else:
         end_datetime = datetime.utcnow() + timedelta(days=TIMESLOTS_DAYS)
-        queryset = queryset.filter(end_datetime__lte=end_datetime)
 
-        if shop_id:
-            queryset = queryset.filter(shop_id=shop_id)
+        queryset = self.get_available_timeslots(start_datetime, end_datetime, shop.id)
 
         if is_available:
             queryset = queryset.filter(pickup_available_quota__gte=1)
-
-        return queryset
 
         return queryset
 
@@ -94,46 +105,28 @@ class PickupTimeslotListAPIView(APIView):
     parameters=[
         OpenApiParameter(name='pickup_booking_id', required=True, type=str),
         OpenApiParameter(name='is_available', type=bool),
-    ]
+    ],
+    responses=GroupedTimeslotListSerializer
 )
-class DeliveryTimeslotListAPIView(APIView):
-    throttle_classes = [UserRateThrottle]
-    permission_classes = [permissions.IsAuthenticated]
+class DeliveryTimeslotListAPIView(TimeslotListAPIView):
+    """delivery timeslots"""
     serializer_class = GroupedTimeslotListSerializer
 
-    def get(self, request, *args, **kwargs):
-        serializer = TimeslotDeliveryRequestSerializer(data=self.request.query_params, context={'request': request})
+    def get_queryset(self, **kwargs):
+        serializer = TimeslotDeliveryRequestSerializer(data=self.request.query_params,
+                                                       context={'request': self.request})
         serializer.is_valid(raise_exception=True)
+        pickup_booking = serializer.validated_data['pickup_booking_id']
+        is_available = bool(serializer.validated_data['is_available'] == 'true')
 
-        timeslots = self.get_queryset(serializer.validated_data['pickup_booking_id'])
-
-        grouped_timeslots = {}
-        for date, group in itertools.groupby(timeslots, key=lambda t: t.start_datetime.date()):
-            grouped_timeslots[date] = list(group)
-
-        grouped_timeslot_list = [{'date': date, 'timeslots': timeslots} for date, timeslots in
-                                 grouped_timeslots.items()]
-
-        serializer = GroupedTimeslotListSerializer(grouped_timeslot_list)
-
-        return Response(serializer.data)
-
-    def get_queryset(self, pickup_booking: BookTimeslot):
         time_slot = pickup_booking.time_slot
         shop = time_slot.shop
         pickup_datetime = time_slot.start_datetime
-        is_available = bool(self.request.query_params.get('is_available') == 'true')
 
-        queryset = Timeslot.objects.all()
+        start_datetime = pickup_datetime + shop.wash_duration
+        end_datetime = pickup_datetime + shop.wash_duration + timedelta(days=TIMESLOTS_DAYS)
 
-        start_datetime_filter = Q(start_datetime__gte=pickup_datetime + shop.wash_duration)
-        shop_filter = Q(shop_id=shop.id)
-        end_datetime_filter = Q(start_datetime__lte=pickup_datetime +
-                                                    shop.wash_duration +
-                                                    timedelta(days=TIMESLOTS_DAYS)
-                                )
-
-        queryset = queryset.filter(start_datetime_filter & shop_filter & end_datetime_filter)
+        queryset = self.get_available_timeslots(start_datetime, end_datetime, shop.id)
 
         if is_available:
             queryset = queryset.filter(delivery_available_quota__gte=1)
@@ -161,13 +154,13 @@ class BookingAPIView(APIView):
         if BookTimeslot.objects.filter(time_slot=timeslot, user=user).exists():
             return Response({'error': 'User has already booked this timeslot'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if booking_type == BookingType.PICKUP.value:
+        if booking_type == BookingType.PICKUP.name:
             if timeslot.pickup_available_quota <= 0:
                 return Response({'error': 'No available pickup quota for this timeslot'},
                                 status=status.HTTP_400_BAD_REQUEST)
             timeslot.pickup_available_quota -= 1
 
-        elif booking_type == BookingType.DELIVERY.value:
+        elif booking_type == BookingType.DELIVERY.name:
             if timeslot.delivery_available_quota <= 0:
                 return Response({'error': 'No available delivery quota for this timeslot'},
                                 status=status.HTTP_400_BAD_REQUEST)

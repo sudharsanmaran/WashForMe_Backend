@@ -21,8 +21,6 @@ class GroupedTimeslotListSerializer(serializers.ListSerializer):
 
 
 class TimeSlotPickupRequestSerializer(serializers.Serializer):
-    # start_date = serializers.DateField(required=False)
-    # end_date = serializers.DateField(required=False)
     shop_id = serializers.PrimaryKeyRelatedField(queryset=Shop.objects.all(), required=True)
     is_available = serializers.BooleanField(required=False)
 
