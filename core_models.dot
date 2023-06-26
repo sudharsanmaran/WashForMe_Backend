@@ -1,6 +1,6 @@
 digraph model_graph {
   // Dotfile by Django-Extensions graph_models
-  // Created: 2023-06-23 05:45
+  // Created: 2023-06-26 06:41
   // Cli Options: -a --dot -o core_models.dot
 
   fontname = "Roboto"
@@ -270,6 +270,24 @@ digraph model_graph {
 
 
 
+  django_contrib_auth_models_PermissionsMixin [label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    PermissionsMixin
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">is_superuser</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">BooleanField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >]
+
   django_contrib_auth_base_user_AbstractBaseUser [label=<
     <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
     <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
@@ -290,24 +308,6 @@ digraph model_graph {
     <FONT FACE="Roboto">password</FONT>
     </TD><TD ALIGN="LEFT">
     <FONT FACE="Roboto">CharField</FONT>
-    </TD></TR>
-  
-  
-    </TABLE>
-    >]
-
-  django_contrib_auth_models_PermissionsMixin [label=<
-    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
-    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
-    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
-    PermissionsMixin
-    </B></FONT></TD></TR>
-  
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Roboto">is_superuser</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Roboto">BooleanField</FONT>
     </TD></TR>
   
   
@@ -989,7 +989,7 @@ digraph model_graph {
     <TR><TD ALIGN="LEFT" BORDER="0">
     <FONT FACE="Roboto"><B>delivery_booking</B></FONT>
     </TD><TD ALIGN="LEFT">
-    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    <FONT FACE="Roboto"><B>OneToOneField (id)</B></FONT>
     </TD></TR>
   
   
@@ -997,7 +997,7 @@ digraph model_graph {
     <TR><TD ALIGN="LEFT" BORDER="0">
     <FONT FACE="Roboto"><B>pickup_booking</B></FONT>
     </TD><TD ALIGN="LEFT">
-    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    <FONT FACE="Roboto"><B>OneToOneField (id)</B></FONT>
     </TD></TR>
   
   
@@ -1407,10 +1407,10 @@ digraph model_graph {
   [label=" user (order)"] [arrowhead=none, arrowtail=dot, dir=both];
 
   core_models_Order -> core_models_BookTimeslot
-  [label=" pickup_booking (pickup_orders)"] [arrowhead=none, arrowtail=dot, dir=both];
+  [label=" pickup_booking (pickup_orders)"] [arrowhead=none, arrowtail=none, dir=both];
 
   core_models_Order -> core_models_BookTimeslot
-  [label=" delivery_booking (delivery_orders)"] [arrowhead=none, arrowtail=dot, dir=both];
+  [label=" delivery_booking (delivery_orders)"] [arrowhead=none, arrowtail=none, dir=both];
 
   core_models_OrderDetails -> core_models_Order
   [label=" order (order_details)"] [arrowhead=none, arrowtail=dot, dir=both];
