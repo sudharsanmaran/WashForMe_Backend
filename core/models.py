@@ -166,8 +166,8 @@ class BookTimeslot(models.Model):
 class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    pickup_booking = models.ForeignKey(BookTimeslot, on_delete=models.CASCADE, related_name='pickup_orders')
-    delivery_booking = models.ForeignKey(BookTimeslot, on_delete=models.CASCADE, related_name='delivery_orders')
+    pickup_booking = models.OneToOneField(BookTimeslot, on_delete=models.CASCADE, related_name='pickup_orders')
+    delivery_booking = models.OneToOneField(BookTimeslot, on_delete=models.CASCADE, related_name='delivery_orders')
     total_price = PositiveDecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     order_status = models.CharField(max_length=20,
                                     choices=[(tag.name, tag.value) for tag in OrderStatus])
