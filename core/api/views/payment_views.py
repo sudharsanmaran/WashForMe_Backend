@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 import razorpay
 from django.conf import settings
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from razorpay.errors import SignatureVerificationError
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -14,7 +15,7 @@ from core.api.serializers.payment_serializers import (
     PaymentSerializer, RazorpayInitiateSerializer, RazorpayPaymentInitiateResponseSerializer,
     RazorpayPartialPaymentSerializer
 )
-from core.constants import INR_UNIT, PaymentSource, PaymentStatus
+from core.constants import INR_UNIT, PaymentSource, PaymentStatus, OrderStatus
 from core.models import Payment, Order, RazorpayPayment
 
 logger = __import__("logging").getLogger(__name__)
@@ -153,18 +154,30 @@ class RazorpayStatusView(APIView):
         razorpay_order_id = validated_data['razorpay_order_id']
         razorpay_payment_id = validated_data['razorpay_payment_id']
         razorpay_signature = validated_data['razorpay_signature']
+        payment = validated_data['payment']
 
         client = RazorpayPaymentInfoView.get_client()
 
-        verified = client.utility.verify_payment_signature({
-            'razorpay_order_id': razorpay_order_id,
-            'razorpay_payment_id': razorpay_payment_id,
-            'razorpay_signature': razorpay_signature
-        })
-        if not verified:
-            return Response({'error': 'can\'t verify given razorpay signature'},
+        try:
+            client.utility.verify_payment_signature({
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            })
+        except SignatureVerificationError as e:
+            return Response({'error': e.args[0]},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # todo update RazorpayPayment obj , order and payment status
+        razorpay_payment = RazorpayPayment.objects.get(razorpay_order_id=razorpay_order_id)
+        razorpay_payment.razorpay_payment_id = razorpay_payment_id
+        razorpay_payment.razorpay_signature = razorpay_signature
+        razorpay_payment.save()
 
-        return Response
+        payment.payment_status = PaymentStatus.SUCCESS.name
+        payment.save()
+
+        order = payment.order
+        order.order_status = OrderStatus.PLACED.name
+        order.save()
+
+        return Response('order placed successfully', status=status.HTTP_200_OK)
