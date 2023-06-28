@@ -156,7 +156,7 @@ class RazorpayStatusView(APIView):
         razorpay_order_id = validated_data['razorpay_order_id']
         razorpay_payment_id = validated_data['razorpay_payment_id']
         razorpay_signature = validated_data['razorpay_signature']
-        payment = validated_data['payment']
+        payment = validated_data['payment_id']
 
         client = RazorpayPaymentInfoView.get_client()
 
@@ -181,6 +181,6 @@ class RazorpayStatusView(APIView):
         order = payment.order
         order.order_status = OrderStatus.PLACED.name
         order.save()
-        order_data = OrderSerializer(order)
+        serializer = OrderSerializer(order)
 
-        return Response(order_data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
