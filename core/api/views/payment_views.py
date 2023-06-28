@@ -156,7 +156,7 @@ class RazorpayStatusView(APIView):
         razorpay_order_id = validated_data['razorpay_order_id']
         razorpay_payment_id = validated_data['razorpay_payment_id']
         razorpay_signature = validated_data['razorpay_signature']
-        payment = validated_data['payment']
+        payment = validated_data['payment_id']
 
         client = RazorpayPaymentInfoView.get_client()
 

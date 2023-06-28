@@ -29,10 +29,11 @@ class RazorpayPaymentInitiateResponseSerializer(serializers.Serializer):
 
 
 class RazorpayPaymentRequestSerializer(serializers.ModelSerializer):
+    payment_id = serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all())
     class Meta:
         model = RazorpayPayment
         fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'payment']
 
 
 class RazorpayInitiateSerializer(serializers.Serializer):
