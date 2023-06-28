@@ -20,7 +20,7 @@ class OrderFilter(FilterSet):
     updated_at__lte = filters.DateTimeFilter(field_name='updated_at', lookup_expr='lte')
     order_status = filters.ChoiceFilter(
         choices=[(tag.name, tag.value) for tag in OrderStatus],
-        field_name='booking_type',
+        field_name='order_status',
         lookup_expr='exact'
     )
 
