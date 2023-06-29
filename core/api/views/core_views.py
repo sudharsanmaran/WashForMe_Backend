@@ -17,7 +17,6 @@ from core.models import (
 class ItemView(BaseAttrViewSet):
     """Item model views."""
     serializer_class = ItemSerializer
-    permission_classes = [permissions.IsAuthenticated]
     queryset = Item.objects.all()
 
 
@@ -27,5 +26,4 @@ class ItemView(BaseAttrViewSet):
 class CategoryView(BaseAttrViewSet):
     """WashCategory model views."""
     serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
     queryset = WashCategory.objects.all()

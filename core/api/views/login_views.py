@@ -50,7 +50,7 @@ class SendOTPView(APIView):
                 from_=settings.TWILIO_PHONE_NUMBER,
             )
         except TwilioRestException as e:
-            error_dict = {'send': False, 'message': str(e)}
+            error_dict, error_message = {'send': False, 'message': str(e)}, None
             if e.code == 21211:
                 error_message = "Invalid phone number"
             elif e.code == 21608:
@@ -111,7 +111,8 @@ class OTPLoginView(APIView):
                 cache.delete(phone_number)
                 return Response(response_data)
             else:
-                return Response({"error": "OTP not generated or expired."})
+                return Response({"error": "OTP not generated or mismatching."},
+                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

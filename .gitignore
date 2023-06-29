@@ -140,3 +140,5 @@ GitHub.sublime-settings
 .history
 .vscode/launch.json
 */__pycache__/*
+core/migrations/*
+.vscode/settings.json
