@@ -47,7 +47,8 @@ class TimeslotListAPIView(APIView):
         booked_timeslots = BookTimeslot.objects.filter(
             Q(time_slot__start_datetime__range=[start_datetime, end_datetime]) |
             Q(time_slot__end_datetime__range=[start_datetime, end_datetime]),
-            time_slot__shop_id=shop_id
+            time_slot__shop_id=shop_id,
+            user_id=self.request.user.id
         ).values_list('time_slot__id', flat=True)
 
         available_timeslots = Timeslot.objects.filter(
