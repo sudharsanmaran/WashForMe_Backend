@@ -39,6 +39,8 @@ class CartListCreateView(generics.ListCreateAPIView):
         user = request.user
         item_id = request.data.get('item')
         wash_category_id = request.data.get('wash_category')
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
         quantity = int(request.data.get('quantity', 1))
 
         calculated_price = CartListCreateView.calculate_price(item_id, wash_category_id, quantity)
