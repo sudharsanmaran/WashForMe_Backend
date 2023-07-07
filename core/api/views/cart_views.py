@@ -5,16 +5,16 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from core.api.serializers.cart_serializers import CartSerializer
+from core.api.serializers.cart_serializers import CartSerializer, CartResponseSerializer
 from core.api.views.user_views import UserDetailView
 from core.models import Cart, Item, WashCategory
 
 
-@extend_schema(tags=['Cart'])
+@extend_schema(tags=['Cart'], request=CartSerializer)
 class CartListCreateView(generics.ListCreateAPIView):
     throttle_classes = [UserRateThrottle]
     queryset = Cart.objects.all()
-    serializer_class = CartSerializer
+    serializer_class = CartResponseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -52,23 +52,24 @@ class CartListCreateView(generics.ListCreateAPIView):
             existing_user_item.quantity += quantity
             existing_user_item.price += calculated_price
             existing_user_item.save()
-            serializer = self.get_serializer(existing_user_item)
+            serializer = CartResponseSerializer(existing_user_item)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            serializer = self.get_serializer(data=request.data)
+            serializer = CartSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(user=user, price=calculated_price)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            saved_instance = serializer.save(user=user, price=calculated_price)
+            serializer = self.get_serializer(saved_instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(
     tags=['Cart'],
+    request=CartSerializer
 )
 class CartListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     throttle_classes = [UserRateThrottle]
     queryset = Cart.objects.all()
-    serializer_class = CartSerializer
+    serializer_class = CartResponseSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
 
@@ -78,7 +79,7 @@ class CartListRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         wash_category_id = request.data.get('wash_category')
         quantity = int(request.data.get('quantity', 1))
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = CartSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         if not wash_category_id:
