@@ -1,13 +1,11 @@
-"""
-Key Serializers.
-"""
+
 from rest_framework import (
     serializers,
 )
 
 from core.models import (
     Item,
-    WashCategory, Cart, Shop, Review, Timeslot, BookTimeslot, Payment, OrderDetails, Order,
+    WashCategory,
 )
 
 

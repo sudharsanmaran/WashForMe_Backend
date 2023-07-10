@@ -17,6 +17,11 @@ class CartListCreateView(generics.ListCreateAPIView):
     serializer_class = CartResponseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+    def get_queryset(self):
+        user = self.request.user
+        return Cart.objects.filter(user=user, quantity__gte=1)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -39,7 +44,7 @@ class CartListCreateView(generics.ListCreateAPIView):
         user = request.user
         item_id = request.data.get('item')
         wash_category_id = request.data.get('wash_category')
-        serializer = self.serializer_class(data=request.data)
+        serializer = CartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         quantity = int(request.data.get('quantity', 1))
 

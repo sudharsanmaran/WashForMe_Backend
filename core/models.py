@@ -111,7 +111,7 @@ class Address(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = [('type', 'is_primary')]
+        unique_together = [('type', 'is_primary', 'user')]
 
 
 class Cart(models.Model):
@@ -119,7 +119,7 @@ class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     wash_category = models.ForeignKey(WashCategory, on_delete=models.CASCADE)
-    quantity = CustomPositiveInteger(default=1)
+    quantity = models.IntegerField(default=1)
     price = PositiveDecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

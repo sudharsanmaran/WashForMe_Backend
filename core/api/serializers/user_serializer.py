@@ -7,12 +7,20 @@ from core.models import Address, User
 
 
 class AddressSerializer(serializers.ModelSerializer):
-    """Serializer class for the user address."""
-
     class Meta:
         model = Address
         fields = '__all__'
-        read_only_fields = ['id', 'user']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        address_type = data['type']
+        is_primary = data['is_primary']
+
+        if is_primary and Address.objects.filter(user=user, type=address_type, is_primary=True).exists():
+            raise serializers.ValidationError("There is already a primary address with the same type.")
+
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
