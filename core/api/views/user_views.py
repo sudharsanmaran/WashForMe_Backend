@@ -61,8 +61,11 @@ class AddressDetailsView(BaseAttrViewSet):
     """AddressDetails model views."""
     serializer_class = AddressSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Address.objects.all()
+
+
+    def get_queryset(self):
+        return Address.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        return serializer.save(user=self.request.user)
 

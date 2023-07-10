@@ -9,8 +9,8 @@ from core.models import Address, User
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = '__all__'
-        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+        exclude = ['user']
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate(self, data):
         user = self.context['request'].user
@@ -30,4 +30,4 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'other_details', 'is_phone_verified',
                   'cart_total_price', 'address']
-        read_only_fields = ['id', 'is_phone_verified', 'cart_total_price']
+        read_only_fields = ['id', 'is_phone_verified', 'cart_total_price', 'address']

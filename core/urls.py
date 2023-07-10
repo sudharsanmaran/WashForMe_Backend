@@ -23,7 +23,7 @@ from core.api.views.user_views import (
 router = DefaultRouter()
 router.register('items', ItemView)
 router.register('categories', CategoryView)
-router.register('address', AddressDetailsView)
+router.register('address', AddressDetailsView,  basename='address')
 router.register('shop', ShopDetailsView)
 # router.register('shop_review', ShopReviewView)
 
