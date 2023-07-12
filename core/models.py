@@ -13,6 +13,7 @@ from django.db import models
 from WashForMe_Backend import settings
 from core.constants import PaymentSource, PaymentStatus, OrderStatus, BookingType, AddressType
 from core.custom_model_fields import PositiveDecimalField, CustomPositiveInteger
+from django.db.models import Q
 
 
 class UserManager(BaseUserManager):
@@ -47,16 +48,19 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """Customized user model"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(max_length=255, unique=True, blank=True, null=True)
+    email = models.EmailField(
+        max_length=255, unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=255, unique=True)
     is_phone_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    dictionary = dict(availability='Yes', notifications='On', language='English', dark_mode='No')
+    dictionary = dict(availability='Yes', notifications='On',
+                      language='English', dark_mode='No')
     other_details = models.TextField(default=dictionary, blank=True)
-    cart_total_price = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
+    cart_total_price = PositiveDecimalField(
+        max_digits=10, decimal_places=2, default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -84,7 +88,8 @@ class Item(models.Model):
 class WashCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=55, unique=True)
-    extra_per_item = PositiveDecimalField(max_digits=10, decimal_places=2, default=0.0)
+    extra_per_item = PositiveDecimalField(
+        max_digits=10, decimal_places=2, default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -111,12 +116,23 @@ class Address(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = [('type', 'is_primary', 'user')]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['address_line_1', 'address_line_2',
+                        'city', 'country', 'pincode', 'type', 'user'],
+                name='unique_address_per_user'),
+            models.UniqueConstraint(
+                fields=['user', 'type'],
+                condition=Q(is_primary=True),
+                name='unique_primary_address_per_user_and_type'
+            ),
+        ]
 
 
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     wash_category = models.ForeignKey(WashCategory, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
@@ -127,10 +143,12 @@ class Cart(models.Model):
 
 class Shop(models.Model):
     name = models.CharField(max_length=100)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     opening_time = models.TimeField()
     closing_time = models.TimeField()
-    time_zone_offset = models.IntegerField(default=330)  # +5:30 offset from UTC
+    time_zone_offset = models.IntegerField(
+        default=330)  # +5:30 offset from UTC
     wash_duration = models.DurationField(default=timedelta(days=2),
                                          validators=[MinValueValidator(timedelta(days=1))])
     time_slot_duration = models.DurationField(default=timedelta(hours=3),
@@ -155,7 +173,8 @@ class Timeslot(models.Model):
 class BookTimeslot(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time_slot = models.ForeignKey(Timeslot, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     address = models.ForeignKey(Address, on_delete=models.CASCADE)
     booking_type = models.CharField(max_length=20,
                                     choices=[(tag.name, tag.value) for tag in BookingType])
@@ -165,10 +184,14 @@ class BookTimeslot(models.Model):
 
 class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    pickup_booking = models.OneToOneField(BookTimeslot, on_delete=models.CASCADE, related_name='pickup_orders')
-    delivery_booking = models.OneToOneField(BookTimeslot, on_delete=models.CASCADE, related_name='delivery_orders')
-    total_price = PositiveDecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    pickup_booking = models.OneToOneField(
+        BookTimeslot, on_delete=models.CASCADE, related_name='pickup_orders')
+    delivery_booking = models.OneToOneField(
+        BookTimeslot, on_delete=models.CASCADE, related_name='delivery_orders')
+    total_price = PositiveDecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
     order_status = models.CharField(max_length=20,
                                     choices=[(tag.name, tag.value) for tag in OrderStatus])
     created_at = models.DateTimeField(auto_now_add=True)
@@ -177,7 +200,8 @@ class Order(models.Model):
 
 class OrderDetails(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_details')
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name='order_details')
     product = models.ForeignKey(Item, on_delete=models.CASCADE)
     wash_category = models.ForeignKey(WashCategory, on_delete=models.CASCADE)
     product_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -190,7 +214,8 @@ class OrderDetails(models.Model):
 
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
     amount = PositiveDecimalField(max_digits=10, decimal_places=2)
     payment_source = models.CharField(max_length=20,
@@ -203,9 +228,11 @@ class Payment(models.Model):
 
 class RazorpayPayment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(
+        max_length=100, blank=True, null=True)
     razorpay_order_id = models.CharField(max_length=100)
-    razorpay_signature = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature = models.CharField(
+        max_length=100, blank=True, null=True)
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -213,8 +240,10 @@ class RazorpayPayment(models.Model):
 
 class Review(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='reviews')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    shop = models.ForeignKey(
+        Shop, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     rating = models.PositiveIntegerField(validators=[MaxValueValidator(5)])
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

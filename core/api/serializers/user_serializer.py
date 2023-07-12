@@ -14,8 +14,24 @@ class AddressSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context['request'].user
-        address_type = data['type']
-        is_primary = data['is_primary']
+        address_line_1 = data.get('address_line_1')
+        address_line_2 = data.get('address_line_2', '')
+        city = data.get('city')
+        country = data.get('country')
+        address_type = data.get('type')
+        is_primary = data.get('is_primary', False)
+
+        existing_address = Address.objects.filter(
+            user=user,
+            address_line_1=address_line_1,
+            address_line_2=address_line_2,
+            city=city,
+            country=country,
+            type=address_type
+        )
+
+        if existing_address.exists():
+            raise serializers.ValidationError("An address with the same details already exists.")
 
         if is_primary and Address.objects.filter(user=user, type=address_type, is_primary=True).exists():
             raise serializers.ValidationError("There is already a primary address with the same type.")

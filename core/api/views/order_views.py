@@ -63,6 +63,7 @@ class OrderRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
 @extend_schema(
     tags=['Orders'],
+    responses=OrderSerializer
 )
 class CartToOrderAPIView(APIView):
     throttle_classes = [UserRateThrottle]
