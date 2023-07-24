@@ -25,12 +25,22 @@ class UserManager(BaseUserManager):
             raise ValueError('Phone number must be number.')
         elif not phonenumbers.is_valid_number(phonenumbers.parse(phone)):
             raise ValueError('Phone number is not valid.')
-        user = self.model(phone=phone, **extra_fields)
-        if password:
-            user.set_password(password)
+
+        try:
+            user = self.model.objects.get(phone=phone)
+        except self.model.DoesNotExist:
+            user = self.model(phone=phone, **extra_fields)
+            if password:
+                user.set_password(password)
+            else:
+                user.set_unusable_password()
+            user.save(using=self._db)
         else:
-            user.set_unusable_password()
-        user.save(using=self._db)
+            for key, value in extra_fields.items():
+                setattr(user, key, value)
+            if password:
+                user.set_password(password)
+            user.save(using=self._db)
 
         return user
 

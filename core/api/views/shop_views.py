@@ -11,7 +11,6 @@ from core.signals import create_shop_timeslots_signal, delete_shop_timeslots_sig
     tags=['Shop Details'],
 )
 class ShopDetailsView(BaseAttrViewSet):
-    """AddressDetails model views."""
     serializer_class = ShopSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Shop.objects.all()
